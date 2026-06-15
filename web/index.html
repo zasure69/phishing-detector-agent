@@ -160,16 +160,16 @@
 
   <div class="composer">
     <div class="composer-inner">
-      <input type="file" id="file" accept=".eml,.msg,.html,.htm,.txt,message/rfc822" hidden />
-      <button id="attach" class="ghost" title="Tải lên file email (.eml, .msg, .html)">📎</button>
-      <textarea id="input" placeholder="Dán email / URL / tin nhắn đáng ngờ… hoặc bấm 📎 tải file .eml/.msg (Enter để gửi)"></textarea>
+      <input type="file" id="file" accept=".eml,.msg,.html,.htm,.txt,message/rfc822,image/*" hidden />
+      <button id="attach" class="ghost" title="Tải lên file email (.eml/.msg/.html) hoặc ảnh chụp màn hình">📎</button>
+      <textarea id="input" placeholder="Dán email / URL / tin nhắn… bấm 📎 tải .eml/ảnh, hoặc Ctrl+V dán ảnh chụp màn hình (Enter để gửi)"></textarea>
       <button id="send">Kiểm tra</button>
     </div>
-    <div class="hint">💡 Tải file <b>.eml/.msg</b> để mình kiểm tra cả link ẩn &amp; tệp đính kèm mà copy-paste sẽ bỏ sót. Phân tích qua 3 AI (~20–30s). Không dùng dữ liệu thật.</div>
+    <div class="hint">💡 Tải <b>.eml/.msg</b> (kiểm tra link ẩn &amp; tệp đính kèm) hoặc <b>ảnh chụp màn hình</b> tin nhắn/email (SMS, Zalo…). Phân tích qua AI (~20–30s). Không dùng dữ liệu thật.</div>
   </div>
 
   <div id="drop-overlay" style="display:none;position:fixed;inset:0;z-index:50;background:rgba(11,16,32,.85);align-items:center;justify-content:center;border:3px dashed var(--accent);">
-    <div style="text-align:center;color:var(--text)"><div style="font-size:48px">📥</div><h2>Thả file email vào đây</h2><p style="color:var(--muted)">.eml · .msg · .html</p></div>
+    <div style="text-align:center;color:var(--text)"><div style="font-size:48px">📥</div><h2>Thả file vào đây</h2><p style="color:var(--muted)">.eml · .msg · .html · ảnh chụp màn hình</p></div>
   </div>
 
 <script>
@@ -257,6 +257,7 @@ function renderResult(d){
     <div class="section"><h3>📋 Dấu hiệu phát hiện</h3>${flags}</div>
     ${renderVT(d.threat_intel)}
     <div class="section"><h3>💡 Khuyến nghị</h3>${recs}</div>
+    ${d.caveat?`<div class="disclosure" style="color:var(--warn)">ℹ️ ${esc(d.caveat)}</div>`:''}
     <div class="disclosure">⚠️ ${esc(d.ai_disclosure || 'Bạn đang tương tác với AI.')} Kết quả mang tính tham khảo.</div>`;
   return card;
 }
@@ -347,10 +348,12 @@ function readFileB64(file){
   });
 }
 
-async function analyzeFile(file){
+async function analyzeFile(file, nameOverride){
   if (file.size > 8*1024*1024){ alert('File quá lớn (>8MB).'); return; }
+  const isImg = (file.type||'').startsWith('image/');
+  const name = nameOverride || file.name || (isImg ? 'screenshot.png' : 'file');
   const b64 = await readFileB64(file);
-  await runAnalyze({ action:'analyze', filename:file.name, content_b64:b64 }, '📎 '+file.name);
+  await runAnalyze({ action:'analyze', filename:name, content_b64:b64 }, (isImg?'🖼️ ':'📎 ')+name);
 }
 
 async function quiz(){
@@ -390,6 +393,17 @@ window.addEventListener('dragover', e=> e.preventDefault());
 window.addEventListener('dragleave', e=>{ e.preventDefault(); if(--dragDepth<=0){ dragDepth=0; overlay.style.display='none'; } });
 window.addEventListener('drop', e=>{ e.preventDefault(); dragDepth=0; overlay.style.display='none';
   const f = e.dataTransfer.files[0]; if(f) analyzeFile(f); });
+
+// Paste a screenshot (Ctrl+V / Cmd+V) — common for SMS/Zalo/Messenger captures
+window.addEventListener('paste', e=>{
+  const items = (e.clipboardData||{}).items || [];
+  for (const it of items){
+    if (it.type && it.type.startsWith('image/')){
+      const blob = it.getAsFile();
+      if (blob){ e.preventDefault(); analyzeFile(blob, 'screenshot.png'); return; }
+    }
+  }
+});
 </script>
 </body>
 </html>

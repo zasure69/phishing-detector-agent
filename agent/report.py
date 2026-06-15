@@ -108,5 +108,7 @@ def render_text(result: dict[str, Any]) -> str:
     lines += ["", "💡 KHUYẾN NGHỊ:"]
     for rec in r.get("recommendations", []):
         lines.append(f"- {rec}")
+    if result.get("caveat"):
+        lines += ["", "ℹ️ " + result["caveat"]]
     lines += ["", "⚠️ Bạn đang tương tác với AI (Phishing Guardian)."]
     return "\n".join(lines)

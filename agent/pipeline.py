@@ -11,8 +11,8 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
-from . import analyzers, config, eml_parser, report, scoring, threat_intel
-from .parser import ParsedInput, parse
+from . import analyzers, config, eml_parser, report, scoring, threat_intel, vision
+from .parser import FREEMAIL_DOMAINS, ParsedInput, parse
 
 
 def _run(parsed: ParsedInput) -> dict[str, Any]:
@@ -80,3 +80,58 @@ def analyze_email_file(raw_bytes: bytes, filename: str | None = None) -> dict[st
     except Exception as e:  # noqa: BLE001
         return {"error": f"Không đọc được file: {e}"}
     return _run(parsed)
+
+
+SCREENSHOT_CAVEAT = (
+    "Đây là phân tích từ ẢNH chụp màn hình — chỉ thấy phần hiển thị, KHÔNG thấy "
+    "link thật, header hay file đính kèm. Độ tin cậy thấp hơn. Nếu có thể, hãy "
+    "gửi email gốc (.eml) để kiểm tra đầy đủ."
+)
+
+
+def analyze_image(raw_bytes: bytes, filename: str | None = None,
+                  mime: str = "image/png") -> dict[str, Any]:
+    """Run the pipeline on a screenshot of an email/message.
+
+    The vision model reads the image into text + visible URLs + visual cues,
+    then the normal pipeline analyzes the reconstructed content. Results carry
+    a caveat: a screenshot hides the real hrefs/headers/attachments.
+    """
+    if not config.llm_configured():
+        return {"error": "LLM not configured. Set LLM_API_KEY and LLM_BASE_URL."}
+    try:
+        v = vision.extract_from_image(raw_bytes, mime)
+    except Exception as e:  # noqa: BLE001
+        return {"error": f"Không đọc được ảnh: {e}"}
+
+    text = (v.get("reconstructed_text") or "").strip()
+    if not text and not v.get("visible_urls"):
+        return {"error": "Không tìm thấy nội dung email/tin nhắn trong ảnh.",
+                "vision": v}
+
+    # Reconstruct an input from what the screenshot showed.
+    parsed = parse(text)
+    parsed.input_type = "screenshot"
+    parsed.source_filename = filename
+    if v.get("sender"):
+        parsed.sender = v["sender"]
+        if "@" in str(v["sender"]):
+            parsed.sender_domain = str(v["sender"]).split("@")[-1].strip(" >").lower()
+            parsed.is_freemail = parsed.sender_domain in FREEMAIL_DOMAINS
+    if v.get("subject"):
+        parsed.subject = v["subject"]
+    # Visible URLs the parser may have missed (displayed text only).
+    for u in eml_parser.extract_urls(" ".join(v.get("visible_urls", []))):
+        if u.raw not in {x.raw for x in parsed.urls}:
+            parsed.urls.append(u)
+    # Visual cues are advisory (not deterministic-critical).
+    vflags = [{"category": "Hình ảnh", "flag": f.get("flag", ""), "why": f.get("why", "")}
+              for f in v.get("visual_red_flags", []) if isinstance(f, dict) and f.get("flag")]
+    parsed.deterministic_flags = vflags + parsed.deterministic_flags
+
+    result = _run(parsed)
+    result["caveat"] = SCREENSHOT_CAVEAT
+    result["vision"] = {"reconstructed_text": text[:1500],
+                        "visible_urls": v.get("visible_urls", [])}
+    result["display"] = report.render_text(result)  # re-render to include caveat
+    return result

@@ -56,6 +56,37 @@ def chat(
     return (resp.choices[0].message.content or "").strip()
 
 
+def chat_with_image(
+    model: str,
+    system: str,
+    user_text: str,
+    image_data_url: str,
+    *,
+    temperature: float = 0.2,
+    max_tokens: int = 2048,
+) -> str:
+    """Single-turn multimodal completion (text + one image). Returns assistant text.
+
+    Requires a vision-capable model (Gemma 4 31B-IT or Qwen 3.5 on the platform).
+    """
+    kwargs: dict[str, Any] = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": [
+                {"type": "text", "text": user_text},
+                {"type": "image_url", "image_url": {"url": image_data_url}},
+            ]},
+        ],
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    if config.DISABLE_THINKING:
+        kwargs["extra_body"] = {"chat_template_kwargs": {"enable_thinking": False}}
+    resp = _client().chat.completions.create(**kwargs)
+    return (resp.choices[0].message.content or "").strip()
+
+
 _JSON_FENCE = re.compile(r"```(?:json)?\s*(.*?)\s*```", re.DOTALL)
 
 

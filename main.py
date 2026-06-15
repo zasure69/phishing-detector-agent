@@ -57,7 +57,13 @@ def handler(payload: dict, context: RequestContext) -> dict:
             except Exception:
                 return {**base, "status": "error",
                         "error": "content_b64 không hợp lệ (phải là base64)."}
-            result = pipeline.analyze_email_file(raw_bytes, payload.get("filename"))
+            from agent import vision
+            filename = payload.get("filename")
+            mime = vision.sniff_mime(raw_bytes, filename)
+            if mime:  # it's an image → screenshot path
+                result = pipeline.analyze_image(raw_bytes, filename, mime)
+            else:     # email file (.eml/.msg/.html/.txt)
+                result = pipeline.analyze_email_file(raw_bytes, filename)
             status = "error" if result.get("error") else "success"
             return {**base, "status": status, **result}
 

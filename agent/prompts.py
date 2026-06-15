@@ -155,6 +155,30 @@ Phân tích chéo (MiniMax):
 {minimax}"""
 
 
+# ── Vision: read a screenshot of an email/message ──
+VISION_SYSTEM = (
+    "Bạn là chuyên gia đọc ảnh chụp màn hình email/tin nhắn để hỗ trợ phát hiện "
+    "lừa đảo. Đọc CHÍNH XÁC chữ trong ảnh (giữ nguyên URL hiển thị, không sửa). "
+    "Luôn trả về JSON hợp lệ, không kèm văn bản ngoài JSON."
+)
+
+VISION_USER = """Đọc ảnh chụp màn hình này và trả về DUY NHẤT một JSON:
+
+{
+  "reconstructed_text": "toàn bộ nội dung chữ đọc được, giữ nguyên xuống dòng",
+  "sender": "địa chỉ/tên người gửi nếu thấy, hoặc null",
+  "subject": "tiêu đề nếu thấy, hoặc null",
+  "visible_urls": ["các URL/đường link nhìn thấy trong ảnh, ghi y nguyên"],
+  "visual_red_flags": [
+    {"flag": "dấu hiệu thị giác đáng ngờ", "why": "vì sao (ngắn gọn)"}
+  ]
+}
+
+Lưu ý dấu hiệu thị giác: logo bị mờ/giả, sai màu thương hiệu, layout lệch, nút
+"đăng nhập/xác minh" giả, ảnh chụp che địa chỉ người gửi thật. Nếu ảnh KHÔNG phải
+email/tin nhắn (vd ảnh phong cảnh), để reconstructed_text rỗng và ghi rõ trong visual_red_flags."""
+
+
 # ── Quiz mode: generate one real + one phishing email ──
 QUIZ_SYSTEM = (
     "Bạn là Phishing Guardian ở chế độ Quiz. Bạn tạo email mẫu để huấn luyện "

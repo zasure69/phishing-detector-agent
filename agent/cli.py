@@ -28,6 +28,7 @@ def main() -> None:
                     help="analyze a built-in sample")
     ap.add_argument("--file", help="analyze the contents of a text file")
     ap.add_argument("--eml", help="analyze an email file (.eml/.msg/.html)")
+    ap.add_argument("--image", help="analyze a screenshot (.png/.jpg/.webp)")
     ap.add_argument("--quiz", nargs="?", const="", metavar="TOPIC",
                     help="generate a real-vs-phishing quiz pair")
     args = ap.parse_args()
@@ -45,6 +46,17 @@ def main() -> None:
     if args.eml:
         with open(args.eml, "rb") as fh:
             result = pipeline.analyze_email_file(fh.read(), args.eml)
+        if result.get("error"):
+            print("ERROR:", result["error"], file=sys.stderr)
+            sys.exit(1)
+        print(result["display"])
+        return
+
+    if args.image:
+        from agent import vision
+        with open(args.image, "rb") as fh:
+            raw = fh.read()
+        result = pipeline.analyze_image(raw, args.image, vision.sniff_mime(raw, args.image) or "image/png")
         if result.get("error"):
             print("ERROR:", result["error"], file=sys.stderr)
             sys.exit(1)

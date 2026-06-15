@@ -14,14 +14,13 @@ build/
 # Local Claude Code config (machine-specific)
 .claude/settings.local.json
 
-# Real / uploaded emails may contain PII — keep them out of git.
-# Synthetic demo samples under samples/eml/ are intentionally tracked.
-/*.eml
-/*.msg
-
-# EICAR test-signature sample — regenerate with samples/eml/build_samples.py.
-# Not committed so local AV doesn't quarantine it on clone.
-samples/eml/04_*.eml
+# Emails can contain PII — ignore ALL .eml/.msg everywhere by default.
+# Only the synthetic demo set is whitelisted (04 = EICAR, stays ignored).
+*.eml
+*.msg
+!samples/eml/01_phishing_hr_salary.eml
+!samples/eml/02_phishing_bank_vcb.eml
+!samples/eml/03_legit_it_notice.eml
 
 
 # macOS

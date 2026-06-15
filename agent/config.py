@@ -27,6 +27,9 @@ LLM_TIMEOUT_SECONDS = float(os.environ.get("LLM_TIMEOUT_SECONDS", "60"))
 QWEN_MODEL = os.environ.get("QWEN_MODEL", "qwen3.5-27b")
 GEMMA_MODEL = os.environ.get("GEMMA_MODEL", "gemma-4-31b-it")
 MINIMAX_MODEL = os.environ.get("MINIMAX_MODEL", "minimax-m2.5")
+# Vision model for screenshot OCR + visual phishing cues. MiniMax M2.5 is NOT
+# multimodal on the platform; Gemma 4 31B-IT and Qwen 3.5 27B both accept images.
+VISION_MODEL = os.environ.get("VISION_MODEL", GEMMA_MODEL)
 
 MINIMAX_ENABLED = _flag("MINIMAX_ENABLED", True)
 
