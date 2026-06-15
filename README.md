@@ -1,134 +1,159 @@
 # Phishing Guardian 🛡️
 
-Agent AI phát hiện email/tin nhắn **lừa đảo phishing**, tối ưu cho **tiếng Việt**.
-Mọi nhân viên mở **giao diện chat web** (không cần cài app), dán nội dung email / URL /
-tin nhắn đáng ngờ → agent phân tích đa chiều qua 3 model AI → trả về **mức độ rủi ro
-(0-100)**, **danh sách dấu hiệu**, và **khuyến nghị hành động** bằng tiếng Việt dễ hiểu.
+Agent AI phát hiện email/tin nhắn **lừa đảo (phishing)**, tối ưu cho **tiếng Việt**.
+Người dùng **dán nội dung**, **tải file email (.eml/.msg/.html)** hoặc **gửi ảnh chụp màn hình**
+(qua web hoặc Microsoft Teams) → agent phân tích đa chiều qua nhiều model AI + tra cứu
+VirusTotal → trả về **điểm an toàn (0–100)**, **danh sách dấu hiệu** và **khuyến nghị** bằng
+tiếng Việt dễ hiểu.
 
-> Built for **Claw-a-thon 2026** (VNG / GreenNode) — track *Agentic Assistant*,
-> platform **AgentBase**. Bạn đang tương tác với AI.
+> Built for **Claw-a-thon 2026** (VNG / GreenNode) — track *Agentic Assistant*, platform
+> **AgentBase**. Bạn đang tương tác với AI; công cụ không lưu dữ liệu thật.
 
 ## 🌐 Dùng thử (live)
 
-Mở link endpoint trên trình duyệt và bắt đầu dán nội dung đáng ngờ:
+Mở link endpoint trên trình duyệt và bắt đầu:
 
 **https://endpoint-e93cb03b-ed4f-4eec-ae08-a4291fd22e18.agentbase-runtime.aiplatform.vngcloud.vn**
 
-- `GET /` → giao diện chat web (dán text **hoặc** tải file .eml/.msg/.html, kéo-thả)
-- `POST /invocations` → API:
-  - dán text: `{"action":"analyze","content":"..."}`
-  - tải file: `{"action":"analyze","filename":"mail.eml","content_b64":"<base64>"}`
+Các kênh & input:
+- **Web chat** (`GET /`): dán text · tải file `.eml/.msg/.html` · gửi ảnh (📎, kéo-thả, hoặc Ctrl+V dán ảnh).
+- **Microsoft Teams**: chat 1:1 với bot, dán nội dung / gửi file / ảnh (xem `teams/`).
+- **API** (`POST /invocations`):
+  - text: `{"action":"analyze","content":"..."}`
+  - file/ảnh: `{"action":"analyze","filename":"mail.eml","content_b64":"<base64>"}`
   - quiz: `{"action":"quiz","topic":"..."}`
-- `GET /health` → health check
+- `GET /health` → health check · `POST /api/messages` → Bot Framework (Teams).
 
-Tải file `.eml/.msg` giúp phát hiện **link ẩn sau text** và **tệp đính kèm nguy hiểm** mà
-copy-paste sẽ bỏ sót (mismatch chữ hiển thị ↔ href, đuôi .exe/.pdf.exe, Reply-To khác
-domain, SPF/DKIM fail).
+## ✨ Điểm nổi bật
+
+- **Đa kênh, đa định dạng**: text, file email, ảnh chụp màn hình — web & Teams.
+- **Khôi phục tín hiệu ẩn từ file `.eml/.msg`**: link thật sau text, header (From/Reply-To/SPF/DKIM),
+  file đính kèm — những thứ copy-paste bỏ sót.
+- **Tín hiệu deterministic** (không cần LLM, đáng tin): mismatch chữ hiển thị ↔ link thật, đuôi
+  file nguy hiểm (`.exe`, `.pdf.exe`, macro), link rút gọn, Reply-To khác domain, SPF/DKIM fail.
+- **Unwrap URL bọc** (Microsoft Safe Links / Proofpoint / Mimecast) trước khi đánh giá → tránh
+  báo nhầm mọi link là giả mạo.
+- **VirusTotal** (tuỳ chọn): tra reputation tên miền + hash file (KHÔNG upload nội dung).
+- **Ảnh chụp màn hình**: Gemma đọc ảnh (OCR + dấu hiệu thị giác) → đưa vào pipeline.
+- **Quiz Mode**: tạo email thật/giả để người dùng đoán.
+- **Điểm an toàn** (cao = an toàn) + band màu (🟢🟡🔴) trực quan.
 
 ## Kiến trúc
 
 ```
-Input (email / URL / text)
-   │  parser.py — tách sender / subject / body / URLs (deterministic)
-   ▼
-┌─────────────────┬──────────────────────┬─────────────────────┐
-│  Qwen 3.5       │  Gemma 4 31B-IT      │  MiniMax M2.5       │
-│  ngôn ngữ VN    │  structured JSON     │  cross-validation   │
-└────────┬────────┴──────────┬───────────┴──────────┬──────────┘
-         ▼ (song song)        ▼                       ▼
-              scoring.py — weighted aggregation (40/35/25)
-              + critical-flag floor (≥70 nếu có cờ critical)
-                              ▼
-              report.py — Qwen tổng hợp báo cáo tiếng Việt
-                              ▼
-        🟢 AN TOÀN (0-30) · 🟡 NGHI NGỜ (31-70) · 🔴 NGUY HIỂM (71-100)
+Input:  dán text  |  file .eml/.msg/.html  |  ảnh chụp màn hình
+          │              │                        │
+          │              │ eml_parser.py          │ vision.py (Gemma đọc ảnh)
+          │              │ (header thật, unwrap    │
+          │              │  Safe Links, href ẩn,   │
+          │              │  đính kèm, tín hiệu      │
+          ▼              ▼  deterministic)         ▼
+                     parser.py — chuẩn hoá input + tách URL
+                                    │
+          ┌──────────────┬──────────────────┬───────────────┬─────────────────┐
+          │  Qwen 3.5    │  Gemma 4 31B-IT  │  MiniMax M2.5 │  VirusTotal     │
+          │  ngôn ngữ VN │  structured JSON │  cross-valid. │  reputation/hash│
+          └──────┬───────┴────────┬─────────┴───────┬───────┴────────┬────────┘
+                 ▼ (song song — đều best-effort, lỗi 1 nhánh không sập pipeline)
+                      scoring.py — weighted (40/35/25) + critical floor
+                                    │
+                      report.py — Qwen tổng hợp báo cáo tiếng Việt
+                                    │
+        🟢 AN TOÀN (≥70 an toàn) · 🟡 NGHI NGỜ (30–69) · 🔴 NGUY HIỂM (≤29 an toàn)
 ```
 
-Mỗi model OpenAI-compatible nên gọi qua một `openai` client duy nhất, chỉ đổi
-`model` (xem `agent/config.py`). Qwen + Gemma chạy song song; MiniMax phụ thuộc
-kết quả của cả hai. Mọi analyzer **degrade gracefully** — lỗi 1 model không làm
-sập pipeline.
+> **Điểm an toàn**: nội bộ engine tính theo *rủi ro* (cao = nguy hiểm); lớp hiển thị đảo thành
+> `an toàn = 100 − rủi ro` để trực quan (cao = an toàn). Band + màu giữ nguyên ý nghĩa.
+
+Mọi model OpenAI-compatible gọi qua một `openai` client (chỉ đổi `model`). Qwen 3.5 là
+reasoning model → bắt buộc tắt "thinking" (`enable_thinking=false`) để không trả về rỗng.
 
 ## Cấu trúc code
 
 | File | Vai trò |
 |------|---------|
-| `main.py` | AgentBase entrypoint (`POST /invocations`, `GET /health`) |
-| `agent/config.py` | Cấu hình từ env (model IDs, weights, thresholds) |
-| `agent/llm_client.py` | OpenAI-compatible client + JSON extraction |
-| `agent/parser.py` | Tách header/body/URL, phân loại input (no LLM) |
+| `main.py` | AgentBase entrypoint: web UI (`GET /`), API (`POST /invocations`), Teams (`POST /api/messages`), `GET /health` |
+| `web/index.html` | Giao diện chat web (text/file/ảnh, kéo-thả, dán ảnh) |
+| `agent/config.py` | Cấu hình từ env (model paths, weights, thresholds, VT, Teams) |
+| `agent/llm_client.py` | OpenAI-compatible client (text + ảnh) + JSON extraction + tắt thinking |
+| `agent/parser.py` | Tách header/body/URL, phân loại input (deterministic) |
+| `agent/eml_parser.py` | Parse `.eml/.msg/.html` → header thật, unwrap Safe Links, href ẩn, đính kèm |
+| `agent/vision.py` | Đọc ảnh chụp màn hình (Gemma) → text + URL + dấu hiệu thị giác |
 | `agent/prompts.py` | Prompt templates cho từng model |
-| `agent/analyzers.py` | Qwen / Gemma / MiniMax analysis functions |
-| `agent/scoring.py` | Risk scoring engine |
+| `agent/analyzers.py` | Qwen / Gemma / MiniMax analysis (degrade gracefully) |
+| `agent/threat_intel.py` | VirusTotal: domain reputation + file hash lookup (không upload) |
+| `agent/scoring.py` | Risk engine + điểm an toàn |
 | `agent/report.py` | Tổng hợp báo cáo + render text |
-| `agent/pipeline.py` | Orchestration end-to-end |
-| `agent/quiz.py` | Quiz Mode (real vs phishing) |
+| `agent/pipeline.py` | Orchestration end-to-end (text / file / ảnh) |
+| `agent/teams.py` | Tích hợp Microsoft Teams (Bot Framework, Adaptive Card) |
+| `agent/quiz.py` | Quiz Mode |
 | `agent/cli.py` | CLI test cục bộ |
-| `samples/` | Email mẫu synthetic để demo/test |
+| `samples/eml/` | Email mẫu synthetic + bộ demo (xem `samples/eml/README.md`) |
+| `teams/` | Teams app package (manifest + icon + zip) — `teams/README.txt` |
+| `docs/teams-IT-request.txt` | Tài liệu yêu cầu IT để dựng bot Teams |
 
 ## Chạy cục bộ
 
 ```bash
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env          # điền LLM_API_KEY (xem /agentbase-llm), model IDs
+cp .env.example .env          # điền LLM_API_KEY, model paths; (tuỳ chọn) VT_API_KEY, MICROSOFT_APP_*
 ```
 
-Lấy API key & model IDs từ GreenNode AI Platform:
-
+Lấy API key & model paths từ GreenNode AI Platform (trong Claude Code):
 ```bash
-# trong Claude Code:
-/agentbase-llm api-keys create     # tạo key → tự lưu vào .env
-/agentbase-llm models list         # xem model IDs (modelStatus = ENABLED)
+/agentbase-llm api-keys create     # tạo key → tự lưu .env
+/agentbase-llm models list         # xem model paths (modelStatus = ENABLED)
 ```
 
 Test pipeline qua CLI (không cần deploy):
-
 ```bash
-python -m agent.cli --sample hr_phishing     # phân tích email mẫu
-python -m agent.cli --file suspicious.txt     # phân tích file
-echo "https://vng-hr-portal.tk/login" | python -m agent.cli -
-python -m agent.cli --quiz "cập nhật lương"   # quiz mode
+python -m agent.cli --sample hr_phishing                # email mẫu (text)
+python -m agent.cli --eml samples/eml/02_phishing_bank_vcb.eml   # file .eml/.msg/.html
+python -m agent.cli --image screenshot.png              # ảnh chụp màn hình
+python -m agent.cli --quiz "cập nhật lương"             # quiz mode
+echo "http://vng-hr-portal.tk/login" | python -m agent.cli -
 ```
 
 Chạy HTTP server cục bộ:
-
 ```bash
-python main.py        # http://0.0.0.0:8080
-curl -X POST http://127.0.0.1:8080/invocations \
-  -H "Content-Type: application/json" \
-  -d '{"action":"analyze","content":"Từ: hr@vng-corp.tk\nVui lòng xác nhận trong 24h: http://vng-hr.tk"}'
-curl http://127.0.0.1:8080/health
+python main.py        # http://0.0.0.0:8080  (nếu cổng 8080 bận: PORT=8137 python main.py)
 ```
 
 ## API
 
-`POST /invocations`
+`POST /invocations` → response gồm:
+- `scoring`: `safety_score` (cao = an toàn), `final_score` (rủi ro nội bộ), `band`, `emoji`, `components`
+- `analysis`: kết quả từng model · `threat_intel`: kết quả VirusTotal
+- `report`: `verdict_line`, `red_flags`, `recommendations` · `display`: bản text render sẵn
+- `ai_disclosure`: tuyên bố AI
 
-```jsonc
-// Phân tích
-{"action": "analyze", "content": "<email / URL / text>"}
-// Quiz
-{"action": "quiz", "topic": "<chủ đề tuỳ chọn>"}
-```
+## Bảo mật theo thiết kế
 
-Response (analyze) gồm: `scoring` (final_score, band, components),
-`analysis` (kết quả 3 model), `report` (verdict, red_flags, recommendations),
-và `display` (báo cáo text render sẵn).
+- **Không tự fetch URL trong email** → tránh SSRF (lộ credential runtime) và bị "cloaking" đánh lừa.
+- **VirusTotal chỉ tra cứu** (domain reputation + hash file), **không upload** nội dung file/URL → an toàn dữ liệu.
+- **Bot Teams** xác thực JWT do Bot Connector phát hành; secret lưu ở `.env`/runtime, không commit Git.
+- **Không lưu dữ liệu thật**; email/ảnh thật **không** đưa vào repo (xem `.gitignore`).
 
 ## Deploy lên AgentBase
 
 ```bash
 # trong Claude Code:
 /agentbase-llm                 # cấu hình LLM API key + models
-/agentbase-wizard test         # validate + test cục bộ
-/agentbase-deploy              # build → push → tạo runtime
-/agentbase-monitor             # logs / metrics sau khi deploy
+/agentbase-deploy              # build → push → tạo/cập nhật runtime
+/agentbase-monitor             # logs / metrics
 ```
+
+## Tích hợp Microsoft Teams
+
+1. Nhờ IT dựng Azure Bot + app registration (xem `docs/teams-IT-request.txt`).
+2. Đặt env trên runtime: `MICROSOFT_APP_ID`, `MICROSOFT_APP_PASSWORD`, `MICROSOFT_APP_TENANT_ID`.
+3. Messaging endpoint của Azure Bot trỏ tới `…/api/messages`.
+4. Upload `teams/phishing-guardian-teams.zip` vào Teams (xem `teams/README.txt`).
 
 ## Lưu ý tuân thủ rulebook
 
 - **Không dùng dữ liệu nội bộ thật** — chỉ synthetic/public (Rule 9.1).
-- **Tuyên bố rõ AI** — mọi response kèm `ai_disclosure` (Rule 11.1).
+- **Tuyên bố rõ AI** — mọi response/Teams card kèm `ai_disclosure` (Rule 11.1).
 - **Model qua MaaS** — không self-host (giới hạn 2 vCPU / 4GB).
-- Nếu dùng model ngoài (OpenAI/Anthropic), khai báo trong README và tự chi trả.
+- Dùng dịch vụ ngoài (VirusTotal, Microsoft Teams) được khai báo trong README.
