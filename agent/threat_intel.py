@@ -111,7 +111,7 @@ def enrich(parsed) -> tuple[list[dict], bool, dict[str, Any]]:
             # VT had no data (e.g. brand-new domain) — record it for transparency.
             summary["domains"].append({"domain": d, "status": "no_data"})
             continue
-        if rep["malicious"] > 0:
+        if rep["malicious"] >= config.VT_MALICIOUS_MIN:
             critical = True
             summary["domains"].append({"domain": d, "status": "malicious", **rep})
             flags.append({
@@ -119,12 +119,13 @@ def enrich(parsed) -> tuple[list[dict], bool, dict[str, Any]]:
                 "flag": f"{rep['malicious']}/{rep['total']} công cụ bảo mật đánh giá '{d}' là ĐỘC HẠI",
                 "why": "Tên miền nằm trong danh sách đen của các hãng bảo mật — nguy cơ phishing/mã độc cao",
             })
-        elif rep["suspicious"] >= 2:
+        elif rep["suspicious"] >= 3 or rep["malicious"] == 1:
+            # Borderline: a couple of engines flag it. Note it, do NOT force critical.
             summary["domains"].append({"domain": d, "status": "suspicious", **rep})
             flags.append({
                 "category": "VirusTotal",
-                "flag": f"{rep['suspicious']} công cụ bảo mật cảnh báo '{d}' đáng ngờ",
-                "why": "Một số hãng bảo mật đánh dấu tên miền này là đáng ngờ",
+                "flag": f"'{d}' bị {rep['malicious'] + rep['suspicious']} công cụ đánh dấu (mức thấp)",
+                "why": "Chỉ số ít công cụ cảnh báo — có thể là nhiễu, nhưng nên thận trọng",
             })
         else:
             summary["domains"].append({"domain": d, "status": "clean", **rep})
@@ -140,7 +141,7 @@ def enrich(parsed) -> tuple[list[dict], bool, dict[str, Any]]:
         if not rep.get("known"):
             summary["files"].append({"filename": a["filename"], "status": "unknown"})
             continue
-        status = "malicious" if rep.get("malicious", 0) > 0 else "clean"
+        status = "malicious" if rep.get("malicious", 0) >= config.VT_MALICIOUS_MIN else "clean"
         summary["files"].append({"filename": a["filename"], "status": status, **rep})
         if status == "malicious":
             critical = True

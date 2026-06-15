@@ -179,8 +179,13 @@ def _analyze_links(links: list[tuple[str, str]]) -> tuple[list[dict], list[dict]
             text_domain = _domain_of(m.group(0))
         # A wrapper we could not unwrap (e.g. Mimecast token) is NOT a mismatch.
         still_wrapped = bool(_wrapper_name(href_domain))
+        # True impersonation = the VISIBLE text presents itself as a normal
+        # site/brand but the link goes elsewhere. A shortener shown AS the text
+        # is not a brand being impersonated, so it never counts as a mismatch.
+        text_is_shortener = text_domain in SHORTENERS
         mismatch = bool(
             text_domain and href_domain and not still_wrapped
+            and not text_is_shortener
             and not _domains_related(text_domain, href_domain)
         )
         records.append({
@@ -195,12 +200,24 @@ def _analyze_links(links: list[tuple[str, str]]) -> tuple[list[dict], list[dict]
         key = f"{text_domain}->{href_domain}"
         if mismatch and key not in seen_mismatch:
             seen_mismatch.add(key)
-            critical = True
-            flags.append({
-                "category": "URL",
-                "flag": f"Link hiển thị '{text_domain}' nhưng thực tế dẫn tới '{href_domain}'",
-                "why": "Kẻ lừa đảo ngụy trang link thật bằng tên miền quen thuộc — dấu hiệu phishing kinh điển",
-            })
+            # Only a *critical* phishing signal when the destination is itself
+            # risky (suspicious TLD or a shortener). A mismatch to an ordinary
+            # domain is worth noting but must NOT force a DANGEROUS verdict —
+            # legit mail (tracking links, redirects) does this all the time.
+            href_risky = _tld_of(href_domain) in SUSPICIOUS_TLDS or href_domain in SHORTENERS
+            if href_risky:
+                critical = True
+                flags.append({
+                    "category": "URL",
+                    "flag": f"Link hiển thị '{text_domain}' nhưng thực tế dẫn tới '{href_domain}'",
+                    "why": "Kẻ lừa đảo ngụy trang link thật bằng tên miền quen thuộc — dấu hiệu phishing kinh điển",
+                })
+            else:
+                flags.append({
+                    "category": "URL",
+                    "flag": f"Link hiển thị '{text_domain}' nhưng dẫn tới tên miền khác '{href_domain}'",
+                    "why": "Đích đến khác với chữ hiển thị — nên kiểm tra kỹ trước khi bấm (chưa chắc là lừa đảo)",
+                })
         if href_domain in SHORTENERS and href_domain not in shortener_seen:
             shortener_seen.add(href_domain)
             flags.append({

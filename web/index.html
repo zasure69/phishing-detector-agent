@@ -267,8 +267,8 @@ function renderVT(ti){
   (ti.domains||[]).forEach(x=>{
     let tag;
     if (x.status==='malicious') tag = `<span class="verdict-tag vt-bad">❌ ${x.malicious}/${x.total} cảnh báo</span>`;
-    else if (x.status==='suspicious') tag = `<span class="verdict-tag vt-bad">⚠️ ${x.suspicious} đáng ngờ</span>`;
-    else if (x.status==='clean') tag = `<span class="verdict-tag vt-clean">✓ sạch (0/${x.total})</span>`;
+    else if (x.status==='suspicious') tag = `<span class="verdict-tag vt-unknown">⚠️ ${(x.malicious||0)+(x.suspicious||0)}/${x.total} (mức thấp)</span>`;
+    else if (x.status==='clean') tag = `<span class="verdict-tag vt-clean">✓ sạch (${x.malicious||0}/${x.total})</span>`;
     else tag = `<span class="verdict-tag vt-unknown">– chưa có dữ liệu</span>`;
     items.push(`<div class="vt-row"><span class="dom">${esc(x.domain)}</span>${tag}</div>`);
   });

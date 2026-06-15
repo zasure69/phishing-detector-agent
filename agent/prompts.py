@@ -10,7 +10,21 @@ QWEN_LANGUAGE_SYSTEM = (
     "Bạn luôn trả về JSON hợp lệ, không kèm văn bản giải thích bên ngoài JSON."
 )
 
-QWEN_LANGUAGE_USER = """Phân tích nội dung dưới đây và trả về DUY NHẤT một JSON theo schema:
+QWEN_LANGUAGE_USER = """Phân tích nội dung dưới đây và trả về DUY NHẤT một JSON theo schema.
+
+LƯU Ý TRÁNH BÁO ĐỘNG SAI (rất quan trọng):
+- Email marketing/hội thảo/khoá học HỢP LỆ vẫn thường có lời kêu gọi ("Đăng ký ngay",
+  "Cơ hội duy nhất"), cảm giác khẩn cấp nhẹ, và được đồng nghiệp CHUYỂN TIẾP. Những
+  điều này KHÔNG tự động là lừa đảo — đừng chấm điểm cao chỉ vì chúng.
+- Tên miền con của thương hiệu lớn (vd: mail.coursera.org, eventing.coursera.org,
+  email.linkedin.com) thường là HỢP LỆ. ĐỪNG khẳng định là giả mạo nếu không có bằng chứng rõ.
+- Việc đồng nghiệp chuyển tiếp kèm lời nhắn thân thiện là bình thường, KHÔNG phải social engineering.
+- Chỉ chấm overall_language_risk_score cao (và critical=true) khi có bằng chứng CỤ THỂ:
+  giả mạo người gửi, link tới tên miền lạ/đáng ngờ, đòi mật khẩu/OTP/thông tin tài khoản,
+  doạ khoá tài khoản/pháp lý, hoặc đính kèm thực thi. Nếu chủ yếu là nội dung quảng bá
+  thông thường, hãy chấm điểm THẤP.
+
+Trả về JSON theo schema:
 
 {{
   "social_engineering_tactics": [
@@ -64,6 +78,13 @@ Return ONLY valid JSON matching this schema:
   "critical": true/false,
   "technical_risk_score": 0-100
 }}
+
+Avoid false positives: subdomains of well-known brands (mail.coursera.org,
+eventing.coursera.org, email.linkedin.com, etc.) are usually LEGITIMATE. A short
+URL in the visible text that resolves to a reputable domain is not by itself
+phishing. Only raise technical_risk_score / critical for concrete signals:
+sender-domain spoofing, links to look-alike or suspicious-TLD domains, freemail
+impersonating an organization, or known phishing patterns.
 
 PRE-PARSED HINTS (deterministic, trust these for ground truth):
 {hints}

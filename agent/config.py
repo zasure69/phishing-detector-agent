@@ -42,6 +42,10 @@ VT_API_KEY = os.environ.get("VT_API_KEY", "")
 VT_ENABLED = _flag("VT_ENABLED", True)
 VT_MAX_DOMAINS = int(os.environ.get("VT_MAX_DOMAINS", "3"))   # stay within 4 req/min free tier
 VT_TIMEOUT_SECONDS = float(os.environ.get("VT_TIMEOUT_SECONDS", "8"))
+# Min engines that must flag a URL/file before we treat it as malicious. On 90+
+# engines a single detection is usually noise (even big legit domains get one),
+# so require >= 2 to avoid false positives.
+VT_MALICIOUS_MIN = int(os.environ.get("VT_MALICIOUS_MIN", "2"))
 
 
 def vt_configured() -> bool:
