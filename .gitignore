@@ -19,3 +19,10 @@ build/
 /*.eml
 /*.msg
 
+# EICAR test-signature sample — regenerate with samples/eml/build_samples.py.
+# Not committed so local AV doesn't quarantine it on clone.
+samples/eml/04_*.eml
+
+
+# macOS
+.DS_Store

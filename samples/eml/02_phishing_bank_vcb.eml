@@ -6,19 +6,19 @@ Authentication-Results: mx.vng.com.vn; spf=fail
  smtp.mailfrom=vcbdigibank-secure.net; dkim=fail; dmarc=fail
 Date: Mon, 15 Jun 2026 03:42:00 +0700
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0130047992961696499=="
+Content-Type: multipart/mixed; boundary="===============0226969929142851530=="
 
---===============0130047992961696499==
+--===============0226969929142851530==
 Content-Type: multipart/alternative;
- boundary="===============4723411283133613743=="
+ boundary="===============8968814312527766972=="
 
---===============4723411283133613743==
+--===============8968814312527766972==
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 
 Vui long xem ban HTML.
 
---===============4723411283133613743==
+--===============8968814312527766972==
 Content-Type: text/html; charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
@@ -35,9 +35,9 @@ fy</a></p>
 <p>Tran trong,<br>Ngan hang TMCP Ngoai thuong Viet Nam (Vietcombank)</p>
 </body></html>
 
---===============4723411283133613743==--
+--===============8968814312527766972==--
 
---===============0130047992961696499==
+--===============0226969929142851530==
 Content-Type: application/octet-stream
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="SaoKe_GiaoDich_15062026.pdf.exe"
@@ -45,4 +45,4 @@ MIME-Version: 1.0
 
 TVqQAGZha2UtZXhlY3V0YWJsZS1wYXlsb2Fk
 
---===============0130047992961696499==--
+--===============0226969929142851530==--

@@ -6,15 +6,15 @@ Authentication-Results:
  mx.vng.com.vn; spf=pass smtp.mailfrom=vng.com.vn; dkim=pass; dmarc=pass
 MIME-Version: 1.0
 Content-Type: multipart/alternative;
- boundary="===============8659248348301101754=="
+ boundary="===============2258101948528281135=="
 
---===============8659248348301101754==
+--===============2258101948528281135==
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 
 Vui long xem ban HTML.
 
---===============8659248348301101754==
+--===============2258101948528281135==
 Content-Type: text/html; charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
@@ -37,4 +37,4 @@ ance</a></p>
 <p>VNG IT Helpdesk</p>
 </body></html>
 
---===============8659248348301101754==--
+--===============2258101948528281135==--
