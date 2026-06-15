@@ -1,0 +1,60 @@
+YÊU CẦU HỖ TRỢ IT - BOT PHISHING GUARDIAN TRÊN MICROSOFT TEAMS
+================================================================
+
+Người yêu cầu: nghiatg@vng.com.vn
+Dự án: (Claw-a-thon 2026 / GreenNode AgentBase)
+
+
+MỤC ĐÍCH
+--------
+Tạo một chatbot trên Teams giúp nhân viên kiểm tra email/tin nhắn/URL nghi lừa đảo:
+người dùng dán nội dung vào chat -> bot trả về mức độ rủi ro + giải thích + khuyến nghị.
+
+- Bot CHỈ xử lý nội dung người dùng chủ động gửi cho nó; KHÔNG đọc hộp thư, KHÔNG truy
+  cập dữ liệu khác, KHÔNG lưu dữ liệu thật.
+- Kiến trúc: Azure Bot Service + Bot Framework (single-tenant, chỉ tenant VNG).
+- Theo nguyên tắc least privilege: KHÔNG yêu cầu quyền Microsoft Graph nào (danh tính
+  người gửi đã có sẵn trong dữ liệu Teams gửi tới bot).
+
+
+THÔNG TIN TÔI BÀN GIAO CHO IT
+-----------------------------
+- Tên hiển thị bot: Phishing Guardian
+- Messaging endpoint (HTTPS) để cấu hình Azure Bot:
+  https://endpoint-e93cb03b-ed4f-4eec-ae08-a4291fd22e18.agentbase-runtime.aiplatform.vngcloud.vn/api/messages
+  (đang chạy trên GreenNode AgentBase; nếu sau này đổi URL tôi sẽ báo IT cập nhật)
+
+
+NHỜ IT CẤP / TẠO GIÚP
+---------------------
+1. App registration trên Entra ID (single-tenant VNG) cho bot.
+2. Client secret (hoặc certificate) cho app registration đó.
+3. Azure Bot resource, liên kết App ID ở trên, BẬT kênh Microsoft Teams, và đặt
+   messaging endpoint = URL ở mục "THÔNG TIN TÔI BÀN GIAO CHO IT" bên trên.
+4. Cho phép tải/duyệt custom Teams app (sideload khi thử nghiệm, hoặc publish vào
+   org app catalog và phê duyệt).
+
+Lưu ý: Không cần admin consent (vì không xin quyền Graph). Không yêu cầu application
+permission, không Mail.*, không Chat.Read.*
+
+
+THÔNG TIN TÔI CẦN NHẬN LẠI TỪ IT
+--------------------------------
+1. Directory (tenant) ID
+2. Application (client) ID
+3. Client secret (kèm ngày hết hạn) - gửi qua KÊNH BÍ MẬT (vault/secret manager),
+   không qua chat/email thường.
+4. Xác nhận Azure Bot đã tạo + kênh Teams đã bật + messaging endpoint đã trỏ đúng URL trên.
+5. Xác nhận Teams app đã được phép sideload/publish (kèm App ID nếu đã đăng ký).
+
+
+QUYỀN IT CẦN CÓ ĐỂ THỰC HIỆN
+----------------------------
+- Application Administrator (tạo app registration + secret)
+- Contributor trên Azure subscription (tạo Azure Bot, cấp quyền)
+- Teams Administrator (cho phép/duyệt app trong Teams)
+
+
+----------------------------------------------------------------
+Có 3 thông tin Tenant ID + Client ID + Client secret cùng Azure Bot (kênh Teams,
+endpoint đã trỏ đúng) là phía dự án có thể tiếp tục triển khai.

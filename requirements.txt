@@ -3,3 +3,4 @@ openai>=1.40.0
 python-dotenv
 extract-msg>=0.48.0
 requests>=2.31.0
+pyjwt[crypto]>=2.8.0

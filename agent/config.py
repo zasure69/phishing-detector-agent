@@ -55,6 +55,17 @@ def vt_configured() -> bool:
     """True when VirusTotal enrichment is enabled and has an API key."""
     return VT_ENABLED and bool(VT_API_KEY)
 
+
+# ── Microsoft Teams bot (Bot Framework) ──
+MICROSOFT_APP_ID = os.environ.get("MICROSOFT_APP_ID", "")
+MICROSOFT_APP_PASSWORD = os.environ.get("MICROSOFT_APP_PASSWORD", "")
+MICROSOFT_APP_TENANT_ID = os.environ.get("MICROSOFT_APP_TENANT_ID", "")
+
+
+def teams_configured() -> bool:
+    """True when the Teams bot has its app id + secret configured."""
+    return bool(MICROSOFT_APP_ID and MICROSOFT_APP_PASSWORD)
+
 # ── Risk scoring weights (sum to 1.0) ──
 WEIGHTS = {
     "language": 0.40,    # Qwen findings

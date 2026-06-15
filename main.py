@@ -19,7 +19,7 @@ from greennode_agentbase import (
     RequestContext,
     PingStatus,
 )
-from starlette.responses import HTMLResponse, PlainTextResponse
+from starlette.responses import HTMLResponse, PlainTextResponse, Response
 
 load_dotenv()
 
@@ -101,6 +101,21 @@ async def serve_chat_ui(request):
 # Register the UI on the root path (and /chat as an alias).
 app.add_route("/", serve_chat_ui, methods=["GET"])
 app.add_route("/chat", serve_chat_ui, methods=["GET"])
+
+
+async def teams_messages(request):
+    """POST /api/messages — Microsoft Teams (Bot Framework) inbound endpoint."""
+    from agent import teams
+    auth = request.headers.get("Authorization", "")
+    try:
+        body = await request.json()
+    except Exception:
+        return Response(status_code=400)
+    status = await teams.handle_activity(body, auth)
+    return Response(status_code=status)
+
+
+app.add_route("/api/messages", teams_messages, methods=["POST"])
 
 
 if __name__ == "__main__":
