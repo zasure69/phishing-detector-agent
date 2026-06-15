@@ -85,8 +85,8 @@ def _bot_token() -> str:
     return _token["value"]
 
 
-def _send_text(activity: dict, text: str) -> None:
-    """Send a reply message back into the originating conversation."""
+def _post_reply(activity: dict, fields: dict) -> None:
+    """Post a reply (text or card) back into the originating conversation."""
     service_url = (activity.get("serviceUrl") or "").rstrip("/")
     conv_id = (activity.get("conversation") or {}).get("id")
     if not service_url or not conv_id:
@@ -96,8 +96,7 @@ def _send_text(activity: dict, text: str) -> None:
         "from": activity.get("recipient"),
         "recipient": activity.get("from"),
         "conversation": activity.get("conversation"),
-        "text": text,
-        "textFormat": "markdown",
+        **fields,
     }
     try:
         r = requests.post(
@@ -112,6 +111,16 @@ def _send_text(activity: dict, text: str) -> None:
         print(f"[teams] send error: {e}", flush=True)
 
 
+def _send_text(activity: dict, text: str) -> None:
+    _post_reply(activity, {"text": text, "textFormat": "markdown"})
+
+
+def _send_card(activity: dict, card: dict) -> None:
+    _post_reply(activity, {"attachments": [
+        {"contentType": "application/vnd.microsoft.card.adaptive", "content": card}
+    ]})
+
+
 _MENTION_RE = re.compile(r"<at>.*?</at>", re.IGNORECASE | re.DOTALL)
 
 
@@ -120,31 +129,70 @@ def _clean_text(activity: dict) -> str:
     return _MENTION_RE.sub("", activity.get("text") or "").strip()
 
 
-def _format_reply(result: dict) -> str:
-    """Render the pipeline result as Teams markdown."""
+_BAND_STYLE = {"AN TOÀN": "good", "NGHI NGỜ": "warning", "NGUY HIỂM": "attention"}
+
+
+def _tb(text: str, **kw) -> dict:
+    return {"type": "TextBlock", "text": text, "wrap": True, **kw}
+
+
+def _build_card(result: dict) -> dict:
+    """Render the pipeline result as an Adaptive Card (Teams)."""
     s = result.get("scoring", {})
     r = result.get("report", {})
-    lines = [f"{s.get('emoji','')} **{s.get('band','')} — {s.get('final_score','?')}/100**"]
+    band = s.get("band", "")
+    style = _BAND_STYLE.get(band, "default")
+    color = _BAND_STYLE.get(band, "default")
+
+    body: list[dict] = [{
+        "type": "Container", "style": style, "bleed": True, "items": [{
+            "type": "ColumnSet", "columns": [
+                {"type": "Column", "width": "stretch", "verticalContentAlignment": "Center",
+                 "items": [_tb(f"{s.get('emoji','')} {band}", weight="Bolder", size="Large")]},
+                {"type": "Column", "width": "auto", "verticalContentAlignment": "Center",
+                 "items": [_tb(f"{s.get('final_score','?')}/100", weight="Bolder", size="ExtraLarge")]},
+            ],
+        }],
+    }]
     if r.get("verdict_line"):
-        lines += ["", r["verdict_line"]]
+        body.append(_tb(r["verdict_line"], spacing="Medium"))
+
     flags = r.get("red_flags", [])
     if flags:
-        lines += ["", "**📋 Dấu hiệu phát hiện:**"]
+        body.append(_tb("📋 Dấu hiệu phát hiện", weight="Bolder", spacing="Medium"))
         for f in flags[:8]:
             why = f" — {f['why']}" if f.get("why") else ""
-            lines.append(f"- **[{f.get('category','?')}]** {f.get('flag','')}{why}")
+            body.append(_tb(f"• **[{f.get('category','?')}]** {f.get('flag','')}{why}",
+                            spacing="Small", color=color))
     recs = r.get("recommendations", [])
     if recs:
-        lines += ["", "**💡 Khuyến nghị:**"]
-        lines += [f"- {x}" for x in recs[:6]]
+        body.append(_tb("💡 Khuyến nghị", weight="Bolder", spacing="Medium"))
+        for x in recs[:6]:
+            body.append(_tb(f"• {x}", spacing="Small"))
+
     ti = result.get("threat_intel", {})
     if ti.get("enabled") and ti.get("checked"):
         doms = ", ".join(f"{d['domain']} ({d.get('status')})" for d in ti.get("domains", [])[:5])
-        lines += ["", f"_🛡️ VirusTotal đã kiểm tra {ti['checked']} mục._" + (f" {doms}" if doms else "")]
+        body.append(_tb(f"🛡️ VirusTotal: đã kiểm tra {ti['checked']} mục. {doms}",
+                        isSubtle=True, size="Small", spacing="Medium"))
     if result.get("caveat"):
-        lines += ["", f"_ℹ️ {result['caveat']}_"]
-    lines += ["", "_⚠️ Bạn đang tương tác với AI (Phishing Guardian). Kết quả mang tính tham khảo._"]
-    return "\n\n".join(lines)
+        body.append(_tb(f"ℹ️ {result['caveat']}", color="warning", isSubtle=True, size="Small"))
+    body.append(_tb("⚠️ Bạn đang tương tác với AI (Phishing Guardian). Kết quả mang tính tham khảo.",
+                    isSubtle=True, size="Small", spacing="Medium"))
+
+    return {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "body": body,
+    }
+
+
+async def _reply_result(activity: dict, result: dict) -> None:
+    if result.get("error"):
+        await asyncio.to_thread(_send_text, activity, f"⚠️ {result['error']}")
+    else:
+        await asyncio.to_thread(_send_card, activity, _build_card(result))
 
 
 WELCOME = (
@@ -220,11 +268,10 @@ async def _process(activity: dict) -> None:
                 return
             raw, name = got
             result = await asyncio.to_thread(_analyze_payload, raw, name)
-            msg = f"⚠️ {result['error']}" if result.get("error") else _format_reply(result)
+            await _reply_result(activity, result)
         except Exception as e:  # noqa: BLE001
             print(f"[teams] attachment error: {e}", flush=True)
-            msg = f"⚠️ Không xử lý được tệp: {e}"
-        await asyncio.to_thread(_send_text, activity, msg)
+            await asyncio.to_thread(_send_text, activity, f"⚠️ Không xử lý được tệp: {e}")
         return
 
     text = _clean_text(activity)
@@ -236,14 +283,10 @@ async def _process(activity: dict) -> None:
     await asyncio.to_thread(_send_text, activity, "⏳ Đang phân tích qua AI, chờ chút…")
     try:
         result = await asyncio.to_thread(pipeline.analyze, text)
-        if result.get("error"):
-            msg = f"⚠️ {result['error']}"
-        else:
-            msg = _format_reply(result)
+        await _reply_result(activity, result)
     except Exception as e:  # noqa: BLE001
         print(f"[teams] pipeline error: {e}", flush=True)
-        msg = "⚠️ Có lỗi khi phân tích. Vui lòng thử lại."
-    await asyncio.to_thread(_send_text, activity, msg)
+        await asyncio.to_thread(_send_text, activity, "⚠️ Có lỗi khi phân tích. Vui lòng thử lại.")
 
 
 async def handle_activity(body: dict, auth_header: str) -> int:
