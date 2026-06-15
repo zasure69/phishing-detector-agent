@@ -87,6 +87,13 @@
   .rec { padding: 6px 0 6px 22px; position: relative; font-size: 13.5px; }
   .rec::before { content: "→"; position: absolute; left: 0; color: var(--accent); }
   .disclosure { padding: 11px 18px; font-size: 12px; color: var(--muted); background: var(--panel-2); }
+  .vt-row { display:flex; align-items:center; gap:8px; padding:5px 0; font-size:13px; border-bottom:1px dashed var(--line); }
+  .vt-row:last-child { border-bottom:0; }
+  .vt-row .dom { font-family: ui-monospace, monospace; }
+  .vt-row .verdict-tag { margin-left:auto; font-size:11.5px; padding:2px 8px; border-radius:6px; }
+  .vt-clean { background:rgba(45,212,167,.15); color:var(--safe); }
+  .vt-bad { background:rgba(255,93,108,.15); color:var(--danger); }
+  .vt-unknown { background:var(--panel-2); color:var(--muted); border:1px solid var(--line); }
 
   /* Quiz card */
   .quiz-email { border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 10px; background: var(--panel-2); }
@@ -248,9 +255,34 @@ function renderResult(d){
       ${r.verdict_line?`<p class="verdict-line">${esc(r.verdict_line)}</p>`:''}
     </div>
     <div class="section"><h3>📋 Dấu hiệu phát hiện</h3>${flags}</div>
+    ${renderVT(d.threat_intel)}
     <div class="section"><h3>💡 Khuyến nghị</h3>${recs}</div>
     <div class="disclosure">⚠️ ${esc(d.ai_disclosure || 'Bạn đang tương tác với AI.')} Kết quả mang tính tham khảo.</div>`;
   return card;
+}
+
+function renderVT(ti){
+  if (!ti || !ti.enabled) return '';   // VT not configured → show nothing
+  const items = [];
+  (ti.domains||[]).forEach(x=>{
+    let tag;
+    if (x.status==='malicious') tag = `<span class="verdict-tag vt-bad">❌ ${x.malicious}/${x.total} cảnh báo</span>`;
+    else if (x.status==='suspicious') tag = `<span class="verdict-tag vt-bad">⚠️ ${x.suspicious} đáng ngờ</span>`;
+    else if (x.status==='clean') tag = `<span class="verdict-tag vt-clean">✓ sạch (0/${x.total})</span>`;
+    else tag = `<span class="verdict-tag vt-unknown">– chưa có dữ liệu</span>`;
+    items.push(`<div class="vt-row"><span class="dom">${esc(x.domain)}</span>${tag}</div>`);
+  });
+  (ti.files||[]).forEach(x=>{
+    let tag;
+    if (x.status==='malicious') tag = `<span class="verdict-tag vt-bad">❌ ${x.malicious}/${x.total} AV phát hiện</span>`;
+    else if (x.status==='clean') tag = `<span class="verdict-tag vt-clean">✓ sạch</span>`;
+    else tag = `<span class="verdict-tag vt-unknown">– chưa có dữ liệu</span>`;
+    items.push(`<div class="vt-row"><span class="dom">📎 ${esc(x.filename)}</span>${tag}</div>`);
+  });
+  const body = items.length ? items.join('')
+    : `<div class="vt-row"><span style="color:var(--muted)">Không có tên miền/tệp nào để đối chiếu.</span></div>`;
+  const n = ti.checked || items.length;
+  return `<div class="section"><h3>🛡️ Đối chiếu VirusTotal · đã kiểm tra ${n} mục</h3>${body}</div>`;
 }
 
 function renderQuiz(d, loadingNode){

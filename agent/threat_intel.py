@@ -102,36 +102,47 @@ def enrich(parsed) -> tuple[list[dict], bool, dict[str, Any]]:
 
     flags: list[dict] = []
     critical = False
-    summary: dict[str, Any] = {"enabled": True, "domains": [], "files": []}
+    summary: dict[str, Any] = {"enabled": True, "checked": 0, "domains": [], "files": []}
 
     for d in _candidate_domains(parsed):
+        summary["checked"] += 1  # we issued a VT request for this domain
         rep = domain_reputation(d)
         if rep is None:
+            # VT had no data (e.g. brand-new domain) — record it for transparency.
+            summary["domains"].append({"domain": d, "status": "no_data"})
             continue
-        summary["domains"].append({"domain": d, **rep})
         if rep["malicious"] > 0:
             critical = True
+            summary["domains"].append({"domain": d, "status": "malicious", **rep})
             flags.append({
                 "category": "VirusTotal",
                 "flag": f"{rep['malicious']}/{rep['total']} công cụ bảo mật đánh giá '{d}' là ĐỘC HẠI",
                 "why": "Tên miền nằm trong danh sách đen của các hãng bảo mật — nguy cơ phishing/mã độc cao",
             })
         elif rep["suspicious"] >= 2:
+            summary["domains"].append({"domain": d, "status": "suspicious", **rep})
             flags.append({
                 "category": "VirusTotal",
                 "flag": f"{rep['suspicious']} công cụ bảo mật cảnh báo '{d}' đáng ngờ",
                 "why": "Một số hãng bảo mật đánh dấu tên miền này là đáng ngờ",
             })
+        else:
+            summary["domains"].append({"domain": d, "status": "clean", **rep})
 
     for a in parsed.attachments:
         h = a.get("sha256")
         if not h:
             continue
+        summary["checked"] += 1
         rep = file_reputation(h)
-        if rep is None or not rep.get("known"):
+        if rep is None:
             continue
-        summary["files"].append({"filename": a["filename"], **rep})
-        if rep.get("malicious", 0) > 0:
+        if not rep.get("known"):
+            summary["files"].append({"filename": a["filename"], "status": "unknown"})
+            continue
+        status = "malicious" if rep.get("malicious", 0) > 0 else "clean"
+        summary["files"].append({"filename": a["filename"], "status": status, **rep})
+        if status == "malicious":
             critical = True
             flags.append({
                 "category": "VirusTotal",
