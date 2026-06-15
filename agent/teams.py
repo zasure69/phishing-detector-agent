@@ -23,7 +23,7 @@ import jwt
 import requests
 from jwt import PyJWKClient
 
-from . import config, pipeline, report
+from . import config, pipeline, report, vision
 
 # ── Inbound JWT validation ──
 _BF_OPENID = "https://login.botframework.com/v1/.well-known/openidconfiguration"
@@ -154,13 +154,84 @@ WELCOME = (
 )
 
 
+_FILE_DOWNLOAD = "application/vnd.microsoft.teams.file.download.info"
+_MAX_ATTACH_BYTES = 10 * 1024 * 1024  # 10 MB
+
+
+def _usable_attachment(activity: dict) -> dict | None:
+    """Pick the first file/image attachment (ignore the HTML message body)."""
+    for a in activity.get("attachments") or []:
+        ct = a.get("contentType", "")
+        if ct == _FILE_DOWNLOAD or ct.startswith("image/"):
+            return a
+    return None
+
+
+def _download_attachment(att: dict) -> tuple[bytes, str] | None:
+    """Download a Teams attachment. Returns (bytes, filename) or None."""
+    ct = att.get("contentType", "")
+    name = att.get("name") or ""
+    if ct == _FILE_DOWNLOAD:
+        url = (att.get("content") or {}).get("downloadUrl")
+        if not url:
+            return None
+        r = requests.get(url, timeout=30)  # pre-signed URL, no auth header needed
+    elif ct.startswith("image/"):
+        url = att.get("contentUrl")
+        if not url:
+            return None
+        # Teams-hosted images require the bot token; fall back to anonymous.
+        r = requests.get(url, headers={"Authorization": f"Bearer {_bot_token()}"}, timeout=30)
+        if r.status_code >= 300:
+            r = requests.get(url, timeout=30)
+        if not name:
+            name = f"image.{ct.split('/')[-1] or 'png'}"
+    else:
+        return None
+    r.raise_for_status()
+    if len(r.content) > _MAX_ATTACH_BYTES:
+        raise ValueError("file quá lớn (>10MB)")
+    return r.content, name
+
+
+def _analyze_payload(raw: bytes, name: str) -> dict:
+    """Route downloaded bytes to the right pipeline path (image / email / text)."""
+    if vision.sniff_mime(raw, name):
+        return pipeline.analyze_image(raw, name, vision.sniff_mime(raw, name))
+    ext = name.lower().rsplit(".", 1)[-1] if "." in name else ""
+    if ext in ("eml", "msg", "html", "htm", "mime"):
+        return pipeline.analyze_email_file(raw, name)
+    try:
+        return pipeline.analyze(raw.decode("utf-8", errors="replace"))
+    except Exception:  # noqa: BLE001
+        return pipeline.analyze_email_file(raw, name)
+
+
 async def _process(activity: dict) -> None:
-    """Background: analyze the message and reply proactively."""
+    """Background: analyze the message (text or attachment) and reply proactively."""
+    att = _usable_attachment(activity)
+
+    if att is not None:
+        await asyncio.to_thread(_send_text, activity, "⏳ Đang tải & phân tích tệp, chờ chút…")
+        try:
+            got = await asyncio.to_thread(_download_attachment, att)
+            if not got:
+                await asyncio.to_thread(_send_text, activity, "⚠️ Không tải được tệp đính kèm.")
+                return
+            raw, name = got
+            result = await asyncio.to_thread(_analyze_payload, raw, name)
+            msg = f"⚠️ {result['error']}" if result.get("error") else _format_reply(result)
+        except Exception as e:  # noqa: BLE001
+            print(f"[teams] attachment error: {e}", flush=True)
+            msg = f"⚠️ Không xử lý được tệp: {e}"
+        await asyncio.to_thread(_send_text, activity, msg)
+        return
+
     text = _clean_text(activity)
     if not text:
         await asyncio.to_thread(
             _send_text, activity,
-            "Hãy dán nội dung email/URL/tin nhắn đáng ngờ để mình kiểm tra nhé.")
+            "Hãy dán nội dung email/URL/tin nhắn đáng ngờ, hoặc đính kèm file .eml/.msg/ảnh chụp màn hình.")
         return
     await asyncio.to_thread(_send_text, activity, "⏳ Đang phân tích qua AI, chờ chút…")
     try:

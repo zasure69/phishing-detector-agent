@@ -77,7 +77,7 @@ MANIFEST = {
         {
             "botId": BOT_ID,
             "scopes": ["personal", "team", "groupChat"],
-            "supportsFiles": False,
+            "supportsFiles": True,
             "isNotificationOnly": False,
         }
     ],
