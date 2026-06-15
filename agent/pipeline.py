@@ -11,7 +11,7 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
-from . import analyzers, config, eml_parser, report, scoring
+from . import analyzers, config, eml_parser, report, scoring, threat_intel
 from .parser import ParsedInput, parse
 
 
@@ -24,18 +24,26 @@ def _run(parsed: ParsedInput) -> dict[str, Any]:
             "parsed": parsed.to_dict(),
         }
 
-    # Stage 1: independent analyses in parallel.
-    with ThreadPoolExecutor(max_workers=2) as pool:
+    # Stage 1: independent analyses + VirusTotal enrichment, all in parallel.
+    # VT runs alongside the LLMs so its network latency overlaps theirs.
+    with ThreadPoolExecutor(max_workers=3) as pool:
         f_lang = pool.submit(analyzers.analyze_language, parsed)
         f_tech = pool.submit(analyzers.analyze_technical, parsed)
+        f_vt = pool.submit(threat_intel.enrich, parsed)
         qwen = f_lang.result()
         gemma = f_tech.result()
+        vt_flags, vt_critical, vt_summary = f_vt.result()
 
     # Stage 2: cross-validation (depends on stage 1).
     minimax = analyzers.cross_validate(parsed, qwen, gemma)
 
-    # Stage 3: aggregate. Deterministic findings (link mismatch, dangerous
-    # attachment, auth failure) can independently force a critical verdict.
+    # Fold VirusTotal findings into the deterministic layer (surfaced first —
+    # ground-truth reputation is the strongest signal we have).
+    parsed.deterministic_flags = vt_flags + parsed.deterministic_flags
+    parsed.deterministic_critical = parsed.deterministic_critical or vt_critical
+
+    # Stage 3: aggregate. Deterministic findings (VT detections, link mismatch,
+    # dangerous attachment, auth failure) can independently force critical.
     score_detail = scoring.score(
         qwen, gemma, minimax, force_critical=parsed.deterministic_critical
     )
@@ -46,6 +54,7 @@ def _run(parsed: ParsedInput) -> dict[str, Any]:
     result = {
         "parsed": parsed.to_dict(),
         "analysis": {"language": qwen, "technical": gemma, "cross_validation": minimax},
+        "threat_intel": vt_summary,
         "scoring": score_detail,
         "report": rep,
     }

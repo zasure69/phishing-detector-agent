@@ -11,6 +11,7 @@ Supported:
 """
 from __future__ import annotations
 
+import hashlib
 import io
 import re
 from email import message_from_bytes
@@ -361,6 +362,7 @@ def parse_eml(raw: bytes, filename: str | None = None) -> ParsedInput:
             p.attachments.append({
                 "filename": fname or "(no name)", "content_type": ctype,
                 "size": len(payload), "ext": _ext_of(fname or ""),
+                "sha256": hashlib.sha256(payload).hexdigest() if payload else None,
                 "suspicious": susp, "reason": reason,
             })
         elif ctype == "text/plain":
@@ -420,9 +422,11 @@ def parse_msg(raw: bytes, filename: str | None = None) -> ParsedInput:
         data = getattr(att, "data", b"") or b""
         size = len(data) if isinstance(data, (bytes, bytearray)) else 0
         susp, reason = _attachment_risk(fname, "application/octet-stream")
+        sha = hashlib.sha256(data).hexdigest() if isinstance(data, (bytes, bytearray)) and data else None
         p.attachments.append({
             "filename": fname or "(no name)", "content_type": "application/octet-stream",
-            "size": size, "ext": _ext_of(fname), "suspicious": susp, "reason": reason,
+            "size": size, "ext": _ext_of(fname), "sha256": sha,
+            "suspicious": susp, "reason": reason,
         })
     return _finalize(p, body_text)
 

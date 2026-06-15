@@ -35,6 +35,19 @@ MINIMAX_ENABLED = _flag("MINIMAX_ENABLED", True)
 # content. Set DISABLE_THINKING=false to re-enable for debugging.
 DISABLE_THINKING = _flag("DISABLE_THINKING", True)
 
+# ── VirusTotal threat intelligence (optional enrichment) ──
+# Privacy-safe by design: domain/URL REPUTATION lookups + file SHA-256 HASH
+# lookups only — never uploads file bytes or URLs. No key → silently disabled.
+VT_API_KEY = os.environ.get("VT_API_KEY", "")
+VT_ENABLED = _flag("VT_ENABLED", True)
+VT_MAX_DOMAINS = int(os.environ.get("VT_MAX_DOMAINS", "3"))   # stay within 4 req/min free tier
+VT_TIMEOUT_SECONDS = float(os.environ.get("VT_TIMEOUT_SECONDS", "8"))
+
+
+def vt_configured() -> bool:
+    """True when VirusTotal enrichment is enabled and has an API key."""
+    return VT_ENABLED and bool(VT_API_KEY)
+
 # ── Risk scoring weights (sum to 1.0) ──
 WEIGHTS = {
     "language": 0.40,    # Qwen findings
