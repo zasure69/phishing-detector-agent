@@ -1,0 +1,44 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.17",
+  "version": "1.0.0",
+  "id": "8f3b1c2e-4d5a-4e6f-9a7b-1c2d3e4f5a6b",
+  "developer": {
+    "name": "VNG - Phishing Guardian",
+    "websiteUrl": "https://endpoint-e93cb03b-ed4f-4eec-ae08-a4291fd22e18.agentbase-runtime.aiplatform.vngcloud.vn",
+    "privacyUrl": "https://endpoint-e93cb03b-ed4f-4eec-ae08-a4291fd22e18.agentbase-runtime.aiplatform.vngcloud.vn/",
+    "termsOfUseUrl": "https://endpoint-e93cb03b-ed4f-4eec-ae08-a4291fd22e18.agentbase-runtime.aiplatform.vngcloud.vn/"
+  },
+  "name": {
+    "short": "Phishing Guardian",
+    "full": "Phishing Guardian - AI phishing detector"
+  },
+  "description": {
+    "short": "AI phát hiện email/tin nhắn lừa đảo (tiếng Việt).",
+    "full": "Dán email / URL / tin nhắn đáng ngờ, Phishing Guardian (AI) sẽ phân tích mức độ rủi ro, chỉ ra dấu hiệu lừa đảo và khuyến nghị hành động. Bạn đang tương tác với AI; công cụ không lưu dữ liệu thật."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#4F8CFF",
+  "bots": [
+    {
+      "botId": "53095134-5a70-4a33-ada7-e12a13cacee5",
+      "scopes": [
+        "personal",
+        "team",
+        "groupChat"
+      ],
+      "supportsFiles": false,
+      "isNotificationOnly": false
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "endpoint-e93cb03b-ed4f-4eec-ae08-a4291fd22e18.agentbase-runtime.aiplatform.vngcloud.vn"
+  ]
+}
