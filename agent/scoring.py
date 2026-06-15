@@ -86,7 +86,8 @@ def score(
 
     band = band_for(final)
     return {
-        "final_score": final,
+        "final_score": final,                 # RISK (internal): higher = more dangerous
+        "safety_score": round(100 - final, 1),  # DISPLAY: higher = safer
         "band": band,
         "emoji": emoji_for(band),
         "critical": critical,

@@ -233,7 +233,7 @@ function esc(s){ const d=document.createElement('div'); d.textContent=s==null?''
 function renderResult(d){
   const s = d.scoring || {}; const r = d.report || {};
   const band = s.band || '—'; const color = BAND_COLOR[band] || 'var(--muted)';
-  const score = (s.final_score!=null)? s.final_score : '—';
+  const score = (s.safety_score!=null)? s.safety_score : '—';  // điểm AN TOÀN (cao = an toàn)
   const card = document.createElement('div'); card.className='card';
 
   let flags = (r.red_flags||[]).map(f => `
@@ -249,7 +249,7 @@ function renderResult(d){
     <div class="gauge-wrap">
       <div class="gauge-top">
         <span class="verdict" style="color:${color}">${esc(s.emoji||'')} ${esc(band)}</span>
-        <span class="score" style="color:${color}">${esc(score)}<small style="font-size:13px;color:var(--muted)">/100</small></span>
+        <span class="score" style="color:${color}">${esc(score)}<small style="font-size:13px;color:var(--muted)">/100 an toàn</small></span>
       </div>
       <div class="bar"><i style="width:${Math.max(3,Number(score)||0)}%;background:${color}"></i></div>
       ${r.verdict_line?`<p class="verdict-line">${esc(r.verdict_line)}</p>`:''}

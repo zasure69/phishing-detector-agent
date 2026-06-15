@@ -150,7 +150,10 @@ def _build_card(result: dict) -> dict:
                 {"type": "Column", "width": "stretch", "verticalContentAlignment": "Center",
                  "items": [_tb(f"{s.get('emoji','')} {band}", weight="Bolder", size="Large")]},
                 {"type": "Column", "width": "auto", "verticalContentAlignment": "Center",
-                 "items": [_tb(f"{s.get('final_score','?')}/100", weight="Bolder", size="ExtraLarge")]},
+                 "items": [
+                     _tb(f"{s.get('safety_score','?')}/100", weight="Bolder", size="ExtraLarge"),
+                     _tb("an toàn", size="Small", isSubtle=True, spacing="None"),
+                 ]},
             ],
         }],
     }]

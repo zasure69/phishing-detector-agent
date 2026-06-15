@@ -92,7 +92,7 @@ def render_text(result: dict[str, Any]) -> str:
     s = result["scoring"]
     r = result["report"]
     lines = [
-        f"{s['emoji']} MỨC ĐỘ {s['band']}: {s['final_score']}/100",
+        f"{s['emoji']} {s['band']} — Độ an toàn: {s.get('safety_score', '?')}/100",
         "",
         r.get("verdict_line", ""),
         "",
