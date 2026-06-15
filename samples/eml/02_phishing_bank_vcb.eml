@@ -1,0 +1,48 @@
+From: "Vietcombank" <no-reply@vcbdigibank-secure.net>
+To: khachhang@vng.com.vn
+Subject: Thong bao giao dich bat thuong - Yeu cau xac minh
+Reply-To: verify@vcb-secure-verify.tk
+Authentication-Results: mx.vng.com.vn; spf=fail
+ smtp.mailfrom=vcbdigibank-secure.net; dkim=fail; dmarc=fail
+Date: Mon, 15 Jun 2026 03:42:00 +0700
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============0130047992961696499=="
+
+--===============0130047992961696499==
+Content-Type: multipart/alternative;
+ boundary="===============4723411283133613743=="
+
+--===============4723411283133613743==
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Vui long xem ban HTML.
+
+--===============4723411283133613743==
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+
+<html><body>
+<p>Kinh gui Quy khach,</p>
+<p>Chung toi phat hien giao dich chuyen khoan <b>15.000.000 VND</b> luc 03:42=
+ ngay 15/06/2026.</p>
+<p>Neu KHONG phai giao dich cua Quy khach, vui long xac minh ngay:<br>
+<a href=3D"http://vcb-secure-verify.tk/login">https://vietcombank.com.vn/veri=
+fy</a></p>
+<p>Luu y: lien ket se het han sau 30 phut.</p>
+<p>Xem chi tiet sao ke trong file dinh kem.</p>
+<p>Tran trong,<br>Ngan hang TMCP Ngoai thuong Viet Nam (Vietcombank)</p>
+</body></html>
+
+--===============4723411283133613743==--
+
+--===============0130047992961696499==
+Content-Type: application/octet-stream
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="SaoKe_GiaoDich_15062026.pdf.exe"
+MIME-Version: 1.0
+
+TVqQAGZha2UtZXhlY3V0YWJsZS1wYXlsb2Fk
+
+--===============0130047992961696499==--

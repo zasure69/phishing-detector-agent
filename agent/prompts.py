@@ -1,0 +1,156 @@
+"""Prompt templates for each model role.
+
+Kept in one place so prompt engineering can be iterated without touching
+pipeline logic. All analysis prompts demand strict JSON output.
+"""
+
+# ── Qwen: Vietnamese language / social-engineering analysis ──
+QWEN_LANGUAGE_SYSTEM = (
+    "Bạn là chuyên gia phân tích phishing email tiếng Việt. "
+    "Bạn luôn trả về JSON hợp lệ, không kèm văn bản giải thích bên ngoài JSON."
+)
+
+QWEN_LANGUAGE_USER = """Phân tích nội dung dưới đây và trả về DUY NHẤT một JSON theo schema:
+
+{{
+  "social_engineering_tactics": [
+    {{"tactic": "mô tả chiêu trò", "evidence": "trích dẫn đoạn văn bản", "severity": "high|medium|low"}}
+  ],
+  "urgency_indicators": ["các câu/cụm từ tạo áp lực thời gian"],
+  "impersonation_signals": ["dấu hiệu giả danh tổ chức/cá nhân"],
+  "language_anomalies": ["lỗi ngôn ngữ, dấu hiệu dịch máy, xưng hô bất thường"],
+  "critical": true/false,                  // true nếu có dấu hiệu lừa đảo nghiêm trọng, rõ ràng
+  "overall_language_risk_score": 0-100,
+  "summary": "tóm tắt 1-2 câu bằng tiếng Việt"
+}}
+
+NỘI DUNG CẦN PHÂN TÍCH:
+---
+{content}
+---"""
+
+
+# ── Gemma: structured technical extraction ──
+GEMMA_TECH_SYSTEM = (
+    "You are a phishing detection system. You return ONLY valid JSON, "
+    "with no prose outside the JSON object."
+)
+
+GEMMA_TECH_USER = """Analyze the email/message below and extract technical indicators.
+Return ONLY valid JSON matching this schema:
+
+{{
+  "urls": [
+    {{
+      "url": "extracted URL",
+      "domain": "domain name",
+      "tld": "top-level domain",
+      "is_suspicious_tld": true/false,
+      "typosquatting_target": "legitimate domain it mimics, or null",
+      "has_redirect": true/false,
+      "ssl_indicators": "any SSL-related observation"
+    }}
+  ],
+  "sender_analysis": {{
+    "from_address": "extracted sender or null",
+    "display_name": "displayed name or null",
+    "domain_mismatch": true/false,
+    "is_freemail": true/false,
+    "spoofing_indicators": []
+  }},
+  "known_patterns": [
+    {{"pattern": "pattern name", "confidence": 0.0-1.0, "description": "why it matches"}}
+  ],
+  "critical": true/false,
+  "technical_risk_score": 0-100
+}}
+
+PRE-PARSED HINTS (deterministic, trust these for ground truth):
+{hints}
+
+MESSAGE:
+---
+{content}
+---"""
+
+
+# ── MiniMax: cross-validation (text-only mode) ──
+MINIMAX_CROSSVAL_SYSTEM = (
+    "You are an independent phishing reviewer. You cross-check other analyses "
+    "to reduce false positives and false negatives. Return ONLY valid JSON."
+)
+
+MINIMAX_CROSSVAL_USER = """Two analyzers reviewed the message below. Independently judge it
+and return ONLY valid JSON:
+
+{{
+  "agrees_with_phishing": true/false,
+  "missed_signals": ["signals the other analyzers may have missed"],
+  "false_positive_risk": "high|medium|low",
+  "critical": true/false,
+  "visual_risk_score": 0-100,
+  "note": "1 short sentence"
+}}
+
+LANGUAGE ANALYSIS (Qwen):
+{qwen}
+
+TECHNICAL ANALYSIS (Gemma):
+{gemma}
+
+MESSAGE:
+---
+{content}
+---"""
+
+
+# ── Qwen: final Vietnamese report synthesis ──
+QWEN_REPORT_SYSTEM = (
+    "Bạn là Phishing Guardian — trợ lý bảo mật AI. Bạn LUÔN nói rõ với người "
+    "dùng rằng họ đang tương tác với AI. Viết tiếng Việt, thân thiện nhưng "
+    "nghiêm túc, không dùng thuật ngữ kỹ thuật phức tạp."
+)
+
+QWEN_REPORT_USER = """Dựa trên kết quả phân tích dưới đây, viết báo cáo ngắn gọn cho người
+dùng KHÔNG chuyên IT. Trả về DUY NHẤT một JSON:
+
+{{
+  "verdict_line": "1 câu kết luận mức độ nguy hiểm",
+  "red_flags": [
+    {{"category": "Ngôn ngữ|URL|Header|Khác", "flag": "dấu hiệu", "why": "vì sao nguy hiểm (ngắn gọn)"}}
+  ],
+  "recommendations": ["hành động cụ thể người dùng nên làm"]
+}}
+
+Mức độ nguy hiểm tổng hợp: {risk_score}/100 ({risk_band})
+
+Phân tích ngôn ngữ (Qwen):
+{qwen}
+
+Phân tích kỹ thuật (Gemma):
+{gemma}
+
+Phân tích chéo (MiniMax):
+{minimax}"""
+
+
+# ── Quiz mode: generate one real + one phishing email ──
+QUIZ_SYSTEM = (
+    "Bạn là Phishing Guardian ở chế độ Quiz. Bạn tạo email mẫu để huấn luyện "
+    "người dùng nhận biết phishing. Dữ liệu hoàn toàn HƯ CẤU, không dùng dữ "
+    "liệu thật. Trả về DUY NHẤT một JSON."
+)
+
+QUIZ_USER = """Tạo 2 email tiếng Việt về cùng một chủ đề "{topic}": một email THẬT
+(hợp lệ) và một email PHISHING (giả mạo, tinh vi). Trả về JSON:
+
+{{
+  "emails": [
+    {{"label": "A", "content": "toàn văn email gồm Từ/Tiêu đề/Nội dung", "is_phishing": true/false}},
+    {{"label": "B", "content": "toàn văn email gồm Từ/Tiêu đề/Nội dung", "is_phishing": true/false}}
+  ],
+  "explanation": "giải thích vì sao email phishing là giả, nêu các dấu hiệu"
+}}
+
+Đặt ngẫu nhiên email phishing vào A hoặc B. Email phishing phải có dấu hiệu
+thực tế (domain giả, tạo áp lực thời gian, yêu cầu thông tin nhạy cảm...)."""
