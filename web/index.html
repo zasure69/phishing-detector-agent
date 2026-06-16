@@ -103,13 +103,15 @@
   .result-head{ display:flex; align-items:center; gap:22px; padding:22px 24px;
     background:linear-gradient(180deg, color-mix(in srgb,var(--c) 8%,#fff), #fff);
     border-bottom:1px solid var(--line) }
-  .ring{ position:relative; width:118px; height:118px; flex:none }
-  .ring svg{ width:118px; height:118px; transform:rotate(-90deg) }
-  .ring .trk{ fill:none; stroke:var(--surface-2); stroke-width:9 }
-  .ring .fil{ fill:none; stroke-width:9; stroke-linecap:round; transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1) }
+  .ring-wrap{ flex:none; display:flex; flex-direction:column; align-items:center; gap:9px }
+  .ring{ position:relative; width:120px; height:120px }
+  .ring svg{ width:120px; height:120px; transform:rotate(-90deg) }
+  .ring .trk{ fill:none; stroke:var(--surface-2); stroke-width:8 }
+  .ring .fil{ fill:none; stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1) }
   .ring-c{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1 }
-  .ring-c .rs{ font-family:"IBM Plex Mono",monospace; font-size:34px; font-weight:600; color:var(--c) }
-  .ring-c .rm{ font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted); margin-top:3px }
+  .ring-c .rs{ font-family:"IBM Plex Mono",monospace; font-size:33px; font-weight:600; color:var(--c); letter-spacing:-.02em }
+  .ring-c .rm{ font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted); margin-top:5px }
+  .ring-cap{ font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); font-weight:700 }
   .result-verdict{ flex:1; min-width:0 }
   .band{ display:inline-flex; align-items:center; gap:7px; font-size:17px; font-weight:800; letter-spacing:-.01em;
     color:var(--c); background:color-mix(in srgb,var(--c) 13%,transparent); padding:6px 13px; border-radius:999px }
@@ -308,8 +310,9 @@ function esc(s){ const d=document.createElement('div'); d.textContent=s==null?''
 function renderResult(d){
   const s = d.scoring || {}; const r = d.report || {};
   const band = s.band || '—'; const color = BAND_COLOR[band] || 'var(--muted)';
-  const score = (s.safety_score!=null)? s.safety_score : '—';   // điểm AN TOÀN (cao = an toàn)
-  const pct = Math.max(0, Math.min(100, Number(score)||0));
+  const raw = (s.safety_score!=null) ? Number(s.safety_score) : null;   // điểm AN TOÀN (cao = an toàn)
+  const score = (raw!=null && isFinite(raw)) ? Math.round(raw) : '—';   // làm tròn cho gọn
+  const pct = Math.max(0, Math.min(100, raw||0));
   const C = 326.7; const off = C - C*pct/100;
   const card = document.createElement('div'); card.className='result';
 
@@ -321,10 +324,13 @@ function renderResult(d){
 
   card.innerHTML = `
     <div class="result-head" style="--c:${color}">
-      <div class="ring">
-        <svg viewBox="0 0 120 120"><circle class="trk" cx="60" cy="60" r="52"></circle>
-          <circle class="fil" cx="60" cy="60" r="52" style="stroke:${color};stroke-dasharray:${C};stroke-dashoffset:${C}"></circle></svg>
-        <div class="ring-c"><span class="rs">${esc(score)}</span><span class="rm">/100 an toàn</span></div>
+      <div class="ring-wrap">
+        <div class="ring">
+          <svg viewBox="0 0 120 120"><circle class="trk" cx="60" cy="60" r="52"></circle>
+            <circle class="fil" cx="60" cy="60" r="52" style="stroke:${color};stroke-dasharray:${C};stroke-dashoffset:${C}"></circle></svg>
+          <div class="ring-c"><span class="rs">${esc(score)}</span><span class="rm">/100</span></div>
+        </div>
+        <span class="ring-cap">Độ an toàn</span>
       </div>
       <div class="result-verdict">
         <span class="band" style="--c:${color}">${esc(s.emoji||'')} ${esc(band)}</span>
