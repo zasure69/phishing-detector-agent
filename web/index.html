@@ -354,14 +354,14 @@ function renderVT(ti){
     let tag;
     if (x.status==='malicious') tag = `<span class="vbadge vt-bad">❌ ${x.malicious}/${x.total} cảnh báo</span>`;
     else if (x.status==='suspicious') tag = `<span class="vbadge vt-unknown">⚠️ ${(x.malicious||0)+(x.suspicious||0)}/${x.total} (mức thấp)</span>`;
-    else if (x.status==='clean') tag = `<span class="vbadge vt-clean">✓ sạch (${x.malicious||0}/${x.total})</span>`;
+    else if (x.status==='clean') tag = `<span class="vbadge vt-clean">✓ An toàn (${x.malicious||0}/${x.total})</span>`;
     else tag = `<span class="vbadge vt-unknown">– chưa có dữ liệu</span>`;
     items.push(`<div class="vt-row"><span class="dom">${esc(x.domain)}</span>${tag}</div>`);
   });
   (ti.files||[]).forEach(x=>{
     let tag;
     if (x.status==='malicious') tag = `<span class="vbadge vt-bad">❌ ${x.malicious}/${x.total} AV phát hiện</span>`;
-    else if (x.status==='clean') tag = `<span class="vbadge vt-clean">✓ sạch</span>`;
+    else if (x.status==='clean') tag = `<span class="vbadge vt-clean">✓ An toàn</span>`;
     else tag = `<span class="vbadge vt-unknown">– chưa có dữ liệu</span>`;
     items.push(`<div class="vt-row"><span class="dom">📎 ${esc(x.filename)}</span>${tag}</div>`);
   });

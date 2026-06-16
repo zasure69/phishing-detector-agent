@@ -175,7 +175,10 @@ def _build_card(result: dict) -> dict:
 
     ti = result.get("threat_intel", {})
     if ti.get("enabled") and ti.get("checked"):
-        doms = ", ".join(f"{d['domain']} ({d.get('status')})" for d in ti.get("domains", [])[:5])
+        vt_lbl = {"clean": "An toàn", "malicious": "độc hại",
+                  "suspicious": "đáng ngờ", "no_data": "chưa có dữ liệu"}
+        doms = ", ".join(f"{d['domain']} ({vt_lbl.get(d.get('status'), d.get('status'))})"
+                         for d in ti.get("domains", [])[:5])
         body.append(_tb(f"🛡️ VirusTotal: đã kiểm tra {ti['checked']} mục. {doms}",
                         isSubtle=True, size="Small", spacing="Medium"))
     if result.get("caveat"):
