@@ -192,6 +192,28 @@
   #drop-overlay .box h2{ margin:12px 0 4px; color:var(--brand-ink); font-size:20px }
   #drop-overlay .box p{ margin:0; color:var(--muted); font-size:13px }
 
+  /* help link + modal hướng dẫn xuất file email */
+  .help{ color:var(--accent); cursor:pointer; font-weight:700; text-decoration:none; white-space:nowrap }
+  .help:hover{ text-decoration:underline }
+  .modal-ov{ position:fixed; inset:0; z-index:60; display:none; align-items:flex-start; justify-content:center;
+    background:rgba(22,32,58,.52); backdrop-filter:blur(5px); padding:5vh 16px; overflow:auto }
+  .modal-ov.show{ display:flex }
+  .modal{ background:var(--surface); border:1px solid var(--line); border-radius:18px; max-width:560px; width:100%;
+    box-shadow:var(--shadow-lg); animation:rise .28s ease both; overflow:hidden }
+  .modal-head{ display:flex; align-items:center; gap:11px; padding:18px 22px; border-bottom:1px solid var(--line) }
+  .modal-head h3{ margin:0; font-size:16px; font-weight:800; letter-spacing:-.01em }
+  .modal-head .x{ margin-left:auto; cursor:pointer; border:0; background:var(--surface-2); color:var(--ink-soft);
+    width:32px; height:32px; border-radius:9px; font-size:14px; box-shadow:none; padding:0; display:grid; place-items:center }
+  .modal-head .x:hover{ background:#e7ebf3; transform:none; filter:none }
+  .modal-body{ padding:6px 22px 20px }
+  .modal .tip{ margin:14px 0 6px; background:color-mix(in srgb,var(--accent) 7%,#fff);
+    border:1px solid color-mix(in srgb,var(--accent) 22%,#fff); border-radius:12px; padding:13px 15px; font-size:13px; color:var(--ink-soft); line-height:1.55 }
+  .howto{ padding:15px 0; border-bottom:1px solid var(--surface-2) }
+  .howto:last-child{ border-bottom:0 }
+  .howto h4{ margin:0 0 8px; font-size:13.5px; font-weight:700; color:var(--brand); display:flex; align-items:center; gap:8px }
+  .howto ol{ margin:0; padding-left:20px } .howto ol li{ font-size:13px; color:var(--ink-soft); line-height:1.65 }
+  .howto p{ margin:0; font-size:13px; color:var(--ink-soft); line-height:1.65 }
+
   @keyframes spin{ to{ transform:rotate(360deg) } }
   @keyframes blink{ 0%,80%,100%{opacity:.2} 40%{opacity:1} }
   @keyframes rise{ from{ opacity:0; transform:translateY(10px) } to{ opacity:1; transform:none } }
@@ -257,10 +279,47 @@
       <textarea id="input" placeholder="Dán email / URL / tin nhắn… hoặc 📎 tải .eml/ảnh, Ctrl+V dán ảnh (Enter để gửi)"></textarea>
       <button id="send">Kiểm tra</button>
     </div>
-    <div class="hint">Tải <b>.eml/.msg</b> để soi link ẩn &amp; tệp đính kèm · gửi <b>ảnh chụp màn hình</b> SMS/Zalo · phân tích bằng AI (~20–30s) · không dùng dữ liệu thật.</div>
+    <div class="hint">Tải <b>.eml/.msg</b> để soi link ẩn &amp; tệp đính kèm · gửi <b>ảnh chụp màn hình</b> SMS/Zalo · <a class="help" id="help-link">Cách lấy file email? ›</a></div>
   </div>
 
   <div id="drop-overlay"><div class="box"><div style="font-size:42px">📥</div><h2>Thả file vào đây</h2><p>.eml · .msg · .html · ảnh chụp màn hình</p></div></div>
+
+  <div class="modal-ov" id="help-modal">
+    <div class="modal">
+      <div class="modal-head"><span style="font-size:20px">📩</span><h3>Cách lấy file email để kiểm tra</h3><button class="x" id="help-close" title="Đóng">✕</button></div>
+      <div class="modal-body">
+        <div class="tip">💡 <b>Nhanh nhất, dùng được mọi nền tảng:</b> mở email, <b>chụp màn hình</b> rồi dán (Ctrl/Cmd+V) hoặc tải ảnh vào ô chat. Tải file <b>.eml/.msg</b> sẽ cho kết quả chính xác hơn (thấy được link ẩn &amp; tệp đính kèm).</div>
+        <div class="howto">
+          <h4>📧 Gmail (trên trình duyệt)</h4>
+          <ol>
+            <li>Mở email cần kiểm tra.</li>
+            <li>Bấm biểu tượng <b>⋮</b> (Thêm) ở góc trên bên phải của email.</li>
+            <li>Chọn <b>"Tải thư xuống"</b> (Download message) → lưu file <b>.eml</b> rồi tải lên đây.</li>
+          </ol>
+        </div>
+        <div class="howto">
+          <h4>📨 Outlook (ứng dụng máy tính)</h4>
+          <ol>
+            <li>Mở hoặc chọn email trong danh sách.</li>
+            <li>Vào <b>File → Save As</b> (Lưu thành), chọn nơi lưu, định dạng <b>.msg</b>.</li>
+            <li>Hoặc <b>kéo thả</b> email thẳng ra màn hình Desktop để tạo file .msg.</li>
+          </ol>
+        </div>
+        <div class="howto">
+          <h4>🍎 Apple Mail (macOS)</h4>
+          <ol>
+            <li>Chọn email trong danh sách.</li>
+            <li>Vào <b>File → Save As</b>, chọn định dạng <b>Raw Message Source</b> → lưu file <b>.eml</b>.</li>
+            <li>Hoặc kéo email ra Desktop để tạo file .eml.</li>
+          </ol>
+        </div>
+        <div class="howto">
+          <h4>🌐 Outlook trên web / nền tảng khác</h4>
+          <p>Nếu không thấy nút tải file: chuyển tiếp email vào ứng dụng Outlook trên máy rồi Save As, hoặc đơn giản nhất là <b>chụp màn hình</b> và gửi ảnh vào đây.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <script>
 const SAMPLES = {
@@ -468,6 +527,13 @@ document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click', ()=>{
   input.value = SAMPLES[c.dataset.ex]; autosize(); input.focus();
 }));
 document.getElementById('quiz-btn').addEventListener('click', quiz);
+
+// Help modal — hướng dẫn xuất file email
+const helpModal = document.getElementById('help-modal');
+document.getElementById('help-link').addEventListener('click', ()=> helpModal.classList.add('show'));
+document.getElementById('help-close').addEventListener('click', ()=> helpModal.classList.remove('show'));
+helpModal.addEventListener('click', e=>{ if(e.target===helpModal) helpModal.classList.remove('show'); });
+window.addEventListener('keydown', e=>{ if(e.key==='Escape') helpModal.classList.remove('show'); });
 
 const fileInput = document.getElementById('file');
 document.getElementById('attach').addEventListener('click', ()=> fileInput.click());
