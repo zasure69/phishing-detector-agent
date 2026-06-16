@@ -210,9 +210,17 @@
     border:1px solid color-mix(in srgb,var(--accent) 22%,#fff); border-radius:12px; padding:13px 15px; font-size:13px; color:var(--ink-soft); line-height:1.55 }
   .howto{ padding:15px 0; border-bottom:1px solid var(--surface-2) }
   .howto:last-child{ border-bottom:0 }
-  .howto h4{ margin:0 0 8px; font-size:13.5px; font-weight:700; color:var(--brand); display:flex; align-items:center; gap:8px }
+  .howto h4{ margin:0 0 9px; font-size:14px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:10px }
   .howto ol{ margin:0; padding-left:20px } .howto ol li{ font-size:13px; color:var(--ink-soft); line-height:1.65 }
+  .howto ol li + li{ margin-top:3px }
   .howto p{ margin:0; font-size:13px; color:var(--ink-soft); line-height:1.65 }
+  .howto .sub{ margin:9px 0 0; font-size:12.5px; font-weight:700; color:var(--brand) }
+  .mlogo{ width:30px; height:30px; border-radius:8px; display:inline-grid; place-items:center; flex:none; box-shadow:var(--shadow-sm) }
+  .mlogo svg{ width:18px; height:18px; display:block }
+  .mlogo.gmail{ background:#fff; border:1px solid var(--line) }
+  .mlogo.outlook{ background:#0F6CBD }
+  .mlogo.apple{ background:linear-gradient(160deg,#3cb6ff,#0a6cff) }
+  .mlogo.other{ background:#64708a }
 
   @keyframes spin{ to{ transform:rotate(360deg) } }
   @keyframes blink{ 0%,80%,100%{opacity:.2} 40%{opacity:1} }
@@ -290,32 +298,37 @@
       <div class="modal-body">
         <div class="tip">💡 <b>Nhanh nhất, dùng được mọi nền tảng:</b> mở email, <b>chụp màn hình</b> rồi dán (Ctrl/Cmd+V) hoặc tải ảnh vào ô chat. Tải file <b>.eml/.msg</b> sẽ cho kết quả chính xác hơn (thấy được link ẩn &amp; tệp đính kèm).</div>
         <div class="howto">
-          <h4>📧 Gmail (trên trình duyệt)</h4>
+          <h4><span class="mlogo gmail"><svg viewBox="0 0 24 24"><path fill="#EA4335" d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg></span> Gmail (trên trình duyệt)</h4>
           <ol>
             <li>Mở email cần kiểm tra.</li>
-            <li>Bấm biểu tượng <b>⋮</b> (Thêm) ở góc trên bên phải của email.</li>
+            <li>Bấm <b>⋮</b> (Thêm / More) ở góc trên bên phải của email.</li>
             <li>Chọn <b>"Tải thư xuống"</b> (Download message) → lưu file <b>.eml</b> rồi tải lên đây.</li>
           </ol>
         </div>
         <div class="howto">
-          <h4>📨 Outlook (ứng dụng máy tính)</h4>
+          <h4><span class="mlogo outlook"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M4 7.2l8 5.4 8-5.4"/></svg></span> Outlook</h4>
+          <p class="sub">Outlook mới / trên web (outlook.com)</p>
           <ol>
-            <li>Mở hoặc chọn email trong danh sách.</li>
-            <li>Vào <b>File → Save As</b> (Lưu thành), chọn nơi lưu, định dạng <b>.msg</b>.</li>
-            <li>Hoặc <b>kéo thả</b> email thẳng ra màn hình Desktop để tạo file .msg.</li>
+            <li>Mở email → bấm <b>… (More actions)</b> ở góc trên bên phải khung đọc thư.</li>
+            <li>Chọn <b>Save as</b> → chọn định dạng <b>.eml</b> hoặc <b>.msg</b>.</li>
+          </ol>
+          <p class="sub">Outlook bản cổ điển (máy tính)</p>
+          <ol>
+            <li>Mở/chọn email → <b>File → Save As</b> → định dạng <b>.msg</b>.</li>
+            <li>Hoặc <b>kéo thả</b> email ra màn hình Desktop để tạo file.</li>
           </ol>
         </div>
         <div class="howto">
-          <h4>🍎 Apple Mail (macOS)</h4>
+          <h4><span class="mlogo apple"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M4 7.2l8 5.4 8-5.4"/></svg></span> Apple Mail (macOS)</h4>
           <ol>
             <li>Chọn email trong danh sách.</li>
-            <li>Vào <b>File → Save As</b>, chọn định dạng <b>Raw Message Source</b> → lưu file <b>.eml</b>.</li>
+            <li>Vào <b>File → Save As</b>, đặt định dạng <b>Raw Message Source</b> → lưu file <b>.eml</b>.</li>
             <li>Hoặc kéo email ra Desktop để tạo file .eml.</li>
           </ol>
         </div>
         <div class="howto">
-          <h4>🌐 Outlook trên web / nền tảng khác</h4>
-          <p>Nếu không thấy nút tải file: chuyển tiếp email vào ứng dụng Outlook trên máy rồi Save As, hoặc đơn giản nhất là <b>chụp màn hình</b> và gửi ảnh vào đây.</p>
+          <h4><span class="mlogo other"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5c2.6 2.4 2.6 14.6 0 17M12 3.5c-2.6 2.4-2.6 14.6 0 17"/></svg></span> Nền tảng khác</h4>
+          <p>Không tìm thấy nút tải file? Đơn giản nhất là <b>chụp màn hình</b> email/tin nhắn rồi gửi ảnh vào đây — dùng được với Zalo, SMS, Yahoo Mail và mọi ứng dụng.</p>
         </div>
       </div>
     </div>
