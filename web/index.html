@@ -62,16 +62,31 @@
   .empty .crest svg{ width:38px;height:38px }
   .empty h2{ font-size:27px; line-height:1.15; margin:0 0 10px; font-weight:800; letter-spacing:-.02em; color:var(--brand-ink) }
   .empty p.lead{ margin:0 auto; font-size:15px; color:var(--ink-soft); max-width:480px; line-height:1.55 }
-  .caps{ display:flex; flex-wrap:wrap; gap:9px; justify-content:center; margin-top:18px }
-  .cap{ font-size:12px; color:var(--ink-soft); background:var(--surface); border:1px solid var(--line);
-    padding:7px 12px; border-radius:9px; font-weight:500; box-shadow:var(--shadow-sm) }
-  .examples{ display:flex; flex-wrap:wrap; gap:9px; justify-content:center; margin-top:24px }
-  .chip{ cursor:pointer; font-size:13px; font-weight:600; color:var(--brand);
-    border:1px solid #d8e0ee; background:var(--surface); padding:9px 15px; border-radius:999px;
-    transition:.16s; box-shadow:var(--shadow-sm) }
-  .chip:hover{ transform:translateY(-2px); border-color:var(--accent); color:var(--accent) }
-  .chip[data-ex="quiz"]{ background:#16203a; color:#fff; border-color:#16203a }
-  .chip[data-ex="quiz"]:hover{ color:#fff; opacity:.92 }
+  /* feature cards */
+  .features{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:30px; text-align:left }
+  .feature{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:17px 16px; box-shadow:var(--shadow-sm); transition:.18s }
+  .feature:hover{ transform:translateY(-2px); box-shadow:var(--shadow-lg) }
+  .feature .ico{ width:40px; height:40px; border-radius:11px; display:grid; place-items:center; font-size:19px; margin-bottom:11px }
+  .feature h3{ margin:0 0 4px; font-size:14px; font-weight:700; color:var(--ink); letter-spacing:-.01em }
+  .feature p{ margin:0; font-size:12.5px; color:var(--muted); line-height:1.5 }
+
+  /* quiz banner — nổi bật như một tính năng riêng */
+  .quiz-banner{ margin-top:16px; display:flex; align-items:center; gap:16px; text-align:left; position:relative; overflow:hidden;
+    background:linear-gradient(135deg,#27508f,#16203a); color:#fff; border-radius:18px; padding:18px 20px; box-shadow:var(--shadow-lg) }
+  .quiz-banner::after{ content:""; position:absolute; right:-44px; top:-44px; width:170px; height:170px; border-radius:50%; background:rgba(255,255,255,.06) }
+  .quiz-banner .qico{ flex:none; width:52px; height:52px; border-radius:14px; display:grid; place-items:center; font-size:28px; background:rgba(255,255,255,.13) }
+  .quiz-banner .qtext{ flex:1; min-width:0; position:relative; z-index:1 }
+  .quiz-banner h3{ margin:0 0 3px; font-size:16px; font-weight:800; letter-spacing:-.01em }
+  .quiz-banner p{ margin:0; font-size:12.5px; color:rgba(255,255,255,.82); line-height:1.45 }
+  .quiz-banner button{ flex:none; background:#fff; color:#16203a; box-shadow:none; position:relative; z-index:1 }
+  .quiz-banner button:hover{ background:#eef3fc; filter:none }
+
+  /* thử nhanh (phụ) */
+  .try{ margin-top:22px; display:flex; align-items:center; gap:9px; justify-content:center; flex-wrap:wrap }
+  .try .lbl{ font-size:12.5px; color:var(--muted); font-weight:500 }
+  .chip{ cursor:pointer; font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    border:1px solid var(--line); background:var(--surface); padding:7px 13px; border-radius:999px; transition:.16s; box-shadow:var(--shadow-sm) }
+  .chip:hover{ border-color:var(--accent); color:var(--accent); transform:translateY(-1px) }
 
   /* ── Messages ── */
   .msg{ display:flex; gap:10px; animation:rise .4s ease both }
@@ -171,7 +186,8 @@
   @keyframes spin{ to{ transform:rotate(360deg) } }
   @keyframes blink{ 0%,80%,100%{opacity:.2} 40%{opacity:1} }
   @keyframes rise{ from{ opacity:0; transform:translateY(10px) } to{ opacity:1; transform:none } }
-  @media (max-width:560px){ .result-head{ flex-direction:column; text-align:center } .empty h2{ font-size:23px } }
+  @media (max-width:560px){ .result-head{ flex-direction:column; text-align:center } .empty h2{ font-size:23px }
+    .features{ grid-template-columns:1fr } .quiz-banner{ flex-direction:column; text-align:center } }
 </style>
 </head>
 <body>
@@ -193,19 +209,33 @@
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5 4.5 5.4v5.3c0 4.6 3.2 7.9 7.5 9.8 4.3-1.9 7.5-5.2 7.5-9.8V5.4L12 2.5Z" fill="currentColor"/><path d="m8.6 12 2.3 2.4 4.5-4.7" stroke="#16203a" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <h2>Kiểm tra email hay tin nhắn đáng ngờ trong vài giây</h2>
-        <p class="lead">Dán nội dung, tải file email (.eml/.msg) hoặc gửi ảnh chụp màn hình.
-          Phishing Guardian sẽ cho biết mức độ an toàn, chỉ ra dấu hiệu lừa đảo và khuyến nghị cụ thể.</p>
-        <div class="caps">
-          <span class="cap">🔗 Bóc link ẩn sau chữ</span>
-          <span class="cap">📎 Soi tệp đính kèm</span>
-          <span class="cap">🛡️ Đối chiếu VirusTotal</span>
-          <span class="cap">🇻🇳 Giải thích tiếng Việt</span>
+        <p class="lead">Dán nội dung, tải file email (.eml/.msg) hoặc gửi ảnh chụp màn hình —
+          Phishing Guardian cho biết mức độ an toàn, chỉ ra dấu hiệu lừa đảo và khuyến nghị cụ thể.</p>
+
+        <div class="features">
+          <div class="feature"><div class="ico" style="background:color-mix(in srgb,var(--accent) 13%,#fff);color:var(--accent)">🔗</div>
+            <h3>Bóc link ẩn</h3><p>Phát hiện link thật ẩn sau chữ hiển thị, kể cả link bọc Safe Links.</p></div>
+          <div class="feature"><div class="ico" style="background:color-mix(in srgb,var(--warn) 16%,#fff);color:var(--warn)">📎</div>
+            <h3>Soi tệp đính kèm</h3><p>Bắt file độc & đuôi giả mạo (.pdf.exe), đối chiếu mã độc đã biết.</p></div>
+          <div class="feature"><div class="ico" style="background:color-mix(in srgb,var(--safe) 16%,#fff);color:var(--safe)">🛡️</div>
+            <h3>Đối chiếu VirusTotal</h3><p>Kiểm tra tên miền & tệp với 90+ công cụ bảo mật.</p></div>
+          <div class="feature"><div class="ico" style="background:color-mix(in srgb,var(--danger) 13%,#fff);color:var(--danger)">🇻🇳</div>
+            <h3>Giải thích tiếng Việt</h3><p>Nêu rõ TẠI SAO đáng ngờ, dễ hiểu cho người không chuyên.</p></div>
         </div>
-        <div class="examples">
+
+        <div class="quiz-banner">
+          <div class="qico">🎯</div>
+          <div class="qtext">
+            <h3>Đố vui: Bạn phân biệt được email thật &amp; giả?</h3>
+            <p>Phishing Guardian tạo 2 email — một thật, một lừa đảo. Bạn thử đoán xem!</p>
+          </div>
+          <button id="quiz-btn">Chơi Quiz</button>
+        </div>
+
+        <div class="try">
+          <span class="lbl">Hoặc thử nhanh:</span>
           <span class="chip" data-ex="hr">📧 Email giả danh HR</span>
-          <span class="chip" data-ex="it">🔐 Cảnh báo bảo mật giả</span>
           <span class="chip" data-ex="bank">🏦 Lừa đảo ngân hàng</span>
-          <span class="chip" data-ex="quiz">🎯 Chơi Quiz đố vui</span>
         </div>
       </div>
     </div>
@@ -409,10 +439,9 @@ input.addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.shiftKey){ e.pre
 function autosize(){ input.style.height='auto'; input.style.height=Math.min(180,input.scrollHeight)+'px'; }
 input.addEventListener('input', autosize);
 document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click', ()=>{
-  const ex=c.dataset.ex;
-  if(ex==='quiz'){ quiz(); return; }
-  input.value = SAMPLES[ex]; autosize(); input.focus();
+  input.value = SAMPLES[c.dataset.ex]; autosize(); input.focus();
 }));
+document.getElementById('quiz-btn').addEventListener('click', quiz);
 
 const fileInput = document.getElementById('file');
 document.getElementById('attach').addEventListener('click', ()=> fileInput.click());
