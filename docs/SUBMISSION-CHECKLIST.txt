@@ -7,7 +7,7 @@ Cập nhật: trước hạn 17/06/2026 12:00
 ------------------------------------------------------------
 1. GITHUB REPOSITORY
 ------------------------------------------------------------
-✅ Repository truy cập được:  https://github.com/zasure69/phishing-detector-agent  (PUBLIC)
+✅ Repository truy cập được:  https://github.com/zasure69/phishing-guardian-chatbot  (PUBLIC)
 ✅ Local đã đồng bộ remote (đã push toàn bộ).
 ✅ README đầy đủ & thống nhất với mô tả Agent (đã đối chiếu các điểm chính:
    Phishing Guardian, AgentBase, tiếng Việt, VirusTotal, Teams, Quiz, ảnh, .eml — đều khớp).
