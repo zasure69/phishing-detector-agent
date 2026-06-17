@@ -1,0 +1,33 @@
+PHISHING GUARDIAN - Submission description (EN, ~250 words)
+===========================================================
+
+Phishing Guardian - A shield against scams for every employee
+
+PROBLEM
+Employees receive a flood of phishing emails and messages every day. Vietnamese-language
+phishing is increasingly sophisticated - impersonating HR, IT, and banks. Many people
+cannot tell real from fake; a single wrong click can leak a password, install malware,
+or lose money.
+
+USERS
+EVERYONE - accounting, HR, marketing, developers - not just the security team, and no
+technical knowledge required.
+
+SOLUTION
+Phishing Guardian is an AI agent running on GreenNode AgentBase. Users paste content,
+upload an email file (.eml/.msg), or send a screenshot - right in a web chat or in
+Microsoft Teams. The agent analyzes from multiple angles using several models (Qwen,
+Gemma, MiniMax), combined with deterministic technical signals and VirusTotal reputation
+checks, then returns a SAFETY SCORE, a list of concrete RED FLAGS, and actionable
+RECOMMENDATIONS in clear Vietnamese.
+
+VALUE
+- Solves a company-wide pain point, usable instantly, no installation.
+- Catches tricks that copy-paste misses: the real link hidden behind display text,
+  dangerous attachments, sender spoofing (SPF/DKIM fail), URL shorteners, Safe Links wrapping.
+- Doesn't just say "dangerous" - it explains WHY, raising user awareness.
+- Secure by design: never opens links itself (avoids SSRF), never uploads real data.
+- Quiz Mode gamifies phishing-awareness training.
+
+Phishing Guardian turns every employee into a layer of defense - proactive, accessible,
+and transparent. You are interacting with AI.
