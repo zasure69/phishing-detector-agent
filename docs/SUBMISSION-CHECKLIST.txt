@@ -1,0 +1,49 @@
+CHECKLIST SUBMISSION — PHISHING GUARDIAN (Claw-a-thon 2026)
+============================================================
+Cập nhật: trước hạn 17/06/2026 12:00
+
+✅ = đã xong & kiểm chứng   ⚠️ = cần BẠN thực hiện
+
+------------------------------------------------------------
+1. GITHUB REPOSITORY
+------------------------------------------------------------
+✅ Repository truy cập được:  https://github.com/zasure69/phishing-detector-agent  (PUBLIC)
+✅ Local đã đồng bộ remote (đã push toàn bộ).
+✅ README đầy đủ & thống nhất với mô tả Agent (đã đối chiếu các điểm chính:
+   Phishing Guardian, AgentBase, tiếng Việt, VirusTotal, Teams, Quiz, ảnh, .eml — đều khớp).
+   ⚠️ Khi điền form: copy mô tả từ docs/submission-mo-ta.txt cho khớp README.
+
+------------------------------------------------------------
+2. VIDEO DEMO AGENT  (host: OneDrive VNG)
+------------------------------------------------------------
+⚠️ CẦN QUAY: theo kịch bản docs/video-demo-script.txt (đã chia cảnh, < 3 phút).
+⚠️ Upload lên OneDrive VNG → mở quyền cho "all Starter" → kiểm tra link mở được
+   bằng tài khoản khác / cửa sổ ẩn danh.
+   Lưu ý: tua nhanh đoạn chờ AI để giữ < 3 phút; nói rõ "AI" ít nhất 1 lần.
+
+------------------------------------------------------------
+3. MÔ TẢ AGENT
+------------------------------------------------------------
+✅ docs/submission-mo-ta.txt — 297 từ (≤ 300).
+✅ Nêu rõ: bài toán (phishing tiếng Việt), người dùng (mọi nhân viên), giá trị.
+
+------------------------------------------------------------
+4. ENDPOINT TRẢI NGHIỆM
+------------------------------------------------------------
+✅ Endpoint: https://endpoint-e93cb03b-ed4f-4eec-ae08-a4291fd22e18.agentbase-runtime.aiplatform.vngcloud.vn
+✅ Truy cập được (GET / và /health đều HTTP 200).
+✅ Đã test ẩn danh (không gửi cookie/credential) — phân tích end-to-end chạy OK.
+   ⚠️ Nên mở lại 1 lần bằng cửa sổ ẩn danh trước khi nộp cho chắc.
+
+------------------------------------------------------------
+5. THÔNG TIN TEAM & THUMBNAIL
+------------------------------------------------------------
+⚠️ Tên team: BẠN tự điền vào form (đảm bảo chính xác).
+✅ Thumbnail 16:9: docs/thumbnail/thumbnail.png (1280x720, tỉ lệ 1.778) — hiển thị đẹp.
+
+------------------------------------------------------------
+GHI CHÚ
+------------------------------------------------------------
+- Mọi tài liệu submission nằm trong docs/.
+- Secret (LLM key, Teams secret, VT key) KHÔNG nằm trong repo (đã .gitignore).
+- Trước hạn: double-check mọi field trên form, submit sớm.
