@@ -1,0 +1,74 @@
+KỊCH BẢN VIDEO DEMO — PHISHING GUARDIAN
+========================================
+Mục tiêu: < 3 phút, chạy end-to-end 1 use case. Quay màn hình + voice-over.
+Endpoint: https://endpoint-e93cb03b-ed4f-4eec-ae08-a4291fd22e18.agentbase-runtime.aiplatform.vngcloud.vn
+
+Chuẩn bị trước khi quay:
+- Mở sẵn endpoint trên trình duyệt (cửa sổ ẩn danh để sạch).
+- Có sẵn 3 file demo: samples/eml/01_phishing_hr_salary.eml, 02_phishing_bank_vcb.eml, 03_legit_it_notice.eml
+  (chạy: python samples/eml/build_samples.py nếu chưa có).
+- 1 ảnh chụp màn hình tin nhắn lừa đảo (tùy chọn).
+
+------------------------------------------------------------
+[0:00–0:25] VẤN ĐỀ (mở đầu, giọng kể)
+------------------------------------------------------------
+Hình: màn hình hộp thư đầy email / 1 email lừa đảo tiếng Việt.
+Lời: "Mỗi ngày, nhân viên nhận hàng loạt email và tin nhắn. Trong đó có những email
+lừa đảo giả danh HR, IT, ngân hàng — ngày càng tinh vi. Chỉ một cú click sai là mất
+mật khẩu, dính mã độc, mất tiền. Nhưng không phải ai cũng phân biệt được thật giả."
+
+------------------------------------------------------------
+[0:25–0:45] GIỚI THIỆU
+------------------------------------------------------------
+Hình: mở trang Phishing Guardian (giao diện chính, feature cards).
+Lời: "Phishing Guardian — trợ lý AI giúp MỌI nhân viên kiểm tra email đáng ngờ chỉ
+trong vài giây. Mở link, dán nội dung, tải file, hoặc gửi ảnh chụp màn hình — không
+cần cài đặt. Agent chạy trên GreenNode AgentBase."
+
+------------------------------------------------------------
+[0:45–1:40] DEMO CHÍNH — phân tích email lừa đảo (điểm nhấn)
+------------------------------------------------------------
+Hình: kéo-thả file 02_phishing_bank_vcb.eml vào ô chat.
+Lời: "Đây là email giả danh Vietcombank. Mình tải nguyên file .eml để agent thấy được
+cả những thứ mà copy-paste bỏ sót."
+(chờ ~20s — có thể tua nhanh)
+Hình: kết quả hiện ra — vòng điểm ĐỎ, NGUY HIỂM.
+Lời: "Kết quả: NGUY HIỂM. Và quan trọng — agent giải thích RÕ TẠI SAO:"
+Chỉ vào từng dấu hiệu:
+  - "Link hiển thị vietcombank.com.vn nhưng thực tế dẫn tới tên miền giả .tk"
+  - "Tệp đính kèm .pdf.exe — mã độc ngụy trang"
+  - "Email không qua được xác thực SPF/DKIM — bị giả mạo người gửi"
+  - "VirusTotal đối chiếu tên miền với 90+ công cụ bảo mật"
+Lời: "Tất cả bằng tiếng Việt dễ hiểu, kèm khuyến nghị hành động cụ thể."
+
+------------------------------------------------------------
+[1:40–2:10] EMAIL THẬT — chứng minh không báo nhầm
+------------------------------------------------------------
+Hình: tải 03_legit_it_notice.eml.
+Lời: "Vậy với email thật thì sao? Đây là thông báo bảo trì hợp lệ từ IT. Agent chấm
+AN TOÀN — điểm cao, màu xanh. Nó không báo động giả, kể cả khi email dùng link bọc
+bảo mật của công ty."
+
+------------------------------------------------------------
+[2:10–2:40] QUIZ MODE + ĐA KÊNH
+------------------------------------------------------------
+Hình: bấm "Chơi Quiz" → 2 email, chọn đáp án → agent giải thích.
+Lời: "Có cả Quiz Mode để rèn kỹ năng nhận biết phishing. Và agent không chỉ trên web —
+còn tích hợp ngay trong Microsoft Teams."
+(Hình: nhanh — ảnh bot trả lời trong Teams nếu có.)
+
+------------------------------------------------------------
+[2:40–2:58] GIÁ TRỊ (kết)
+------------------------------------------------------------
+Hình: quay lại trang chính / thumbnail.
+Lời: "Phishing Guardian biến mỗi nhân viên thành một lớp phòng thủ — chủ động, dễ dùng,
+và minh bạch. Bạn đang tương tác với AI. Cảm ơn đã lắng nghe."
+
+------------------------------------------------------------
+MẸO QUAY
+------------------------------------------------------------
+- Tua nhanh (1.5–2x) đoạn chờ AI phân tích để giữ video < 3 phút.
+- Phóng to trình duyệt (Cmd/Ctrl +) để chữ rõ khi quay.
+- Tắt thông báo hệ thống, dùng cửa sổ ẩn danh cho gọn.
+- Nếu mạng chậm, quay sẵn từng đoạn rồi ghép.
+- Nhớ: nói rõ "AI" ít nhất 1 lần (yêu cầu rulebook về tuyên bố AI).

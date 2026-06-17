@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;box-sizing:border-box}
+  body{width:1280px;height:720px;overflow:hidden;font-family:"Hanken Grotesk",sans-serif;
+    background:radial-gradient(1100px 700px at 82% -8%,#27508f,#101a32 60%),#0c1426; color:#fff; position:relative}
+  .grid{position:absolute;inset:0;opacity:.4;
+    background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+    background-size:46px 46px;mask-image:radial-gradient(circle at 70% 40%,#000,transparent 78%)}
+  .glow{position:absolute;width:520px;height:520px;border-radius:50%;filter:blur(20px)}
+  .g1{right:-120px;top:-140px;background:radial-gradient(circle,rgba(47,120,230,.34),transparent 65%)}
+  .g2{left:-160px;bottom:-180px;background:radial-gradient(circle,rgba(15,157,118,.22),transparent 65%)}
+  .wrap{position:relative;z-index:2;height:100%;display:flex;align-items:center;padding:0 76px;gap:60px}
+  .left{flex:1}
+  .badge{display:inline-flex;align-items:center;gap:9px;font-size:17px;font-weight:700;color:#bcd2f5;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);padding:9px 16px;border-radius:999px;margin-bottom:26px}
+  .badge .dot{width:9px;height:9px;border-radius:50%;background:#2fe0a6;box-shadow:0 0 0 5px rgba(47,224,166,.2)}
+  h1{font-size:74px;line-height:1.02;font-weight:900;letter-spacing:-.025em;margin-bottom:22px}
+  h1 .hl{background:linear-gradient(100deg,#5fa0ff,#2fe0a6);-webkit-background-clip:text;background-clip:text;color:transparent}
+  p.sub{font-size:25px;line-height:1.4;color:#c4d0e6;font-weight:500;max-width:620px;margin-bottom:32px}
+  .tags{display:flex;gap:12px;flex-wrap:wrap}
+  .tag{font-size:18px;font-weight:600;color:#e6edfa;background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.14);padding:11px 18px;border-radius:13px}
+  /* right: shield + ring */
+  .right{flex:none;width:380px;display:flex;flex-direction:column;align-items:center;gap:30px}
+  .shield{width:150px;height:150px;border-radius:40px;display:grid;place-items:center;
+    background:linear-gradient(155deg,#3a6fc4,#16203a);box-shadow:0 30px 70px rgba(0,0,0,.5)}
+  .shield svg{width:84px;height:84px}
+  .ring{position:relative;width:260px;height:260px}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ring .num{font-family:"IBM Plex Mono",monospace;font-size:78px;font-weight:600;color:#2fe0a6;line-height:1}
+  .ring .lbl{font-size:18px;color:#9fb0cc;margin-top:8px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+  .brand{position:absolute;left:76px;bottom:42px;z-index:2;display:flex;align-items:center;gap:13px}
+  .brand .lg{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(155deg,#3a6fc4,#16203a)}
+  .brand .lg svg{width:25px;height:25px}
+  .brand .t b{font-size:23px;font-weight:800;display:block;line-height:1}
+  .brand .t span{font-size:15px;color:#9fb0cc;font-weight:600}
+  .plat{position:absolute;right:76px;bottom:46px;z-index:2;text-align:right;font-size:15px;color:#8fa0bd;font-weight:600;line-height:1.5}
+</style></head>
+<body>
+  <div class="grid"></div><div class="glow g1"></div><div class="glow g2"></div>
+  <div class="wrap">
+    <div class="left">
+      <span class="badge"><span class="dot"></span>Claw-a-thon 2026 · Agentic Assistant</span>
+      <h1>Phishing Guardian<br><span class="hl">Lá chắn chống lừa đảo</span></h1>
+      <p class="sub">AI phát hiện email &amp; tin nhắn lừa đảo, tối ưu tiếng Việt — cho mọi nhân viên.</p>
+      <div class="tags"><span class="tag">🔗 Bóc link ẩn</span><span class="tag">📎 Soi tệp đính kèm</span><span class="tag">🛡️ VirusTotal</span></div>
+    </div>
+    <div class="right">
+      <div class="shield"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5 4.5 5.4v5.3c0 4.6 3.2 7.9 7.5 9.8 4.3-1.9 7.5-5.2 7.5-9.8V5.4L12 2.5Z" fill="#fff"/><path d="m8.6 12 2.3 2.4 4.5-4.7" stroke="#16203a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="ring">
+        <svg width="260" height="260"><circle cx="130" cy="130" r="112" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="16"/>
+          <circle cx="130" cy="130" r="112" fill="none" stroke="#2fe0a6" stroke-width="16" stroke-linecap="round"
+            stroke-dasharray="703.7" stroke-dashoffset="35"/></svg>
+        <div class="c"><span class="num">97</span><span class="lbl">độ an toàn</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="brand"><div class="lg"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5 4.5 5.4v5.3c0 4.6 3.2 7.9 7.5 9.8 4.3-1.9 7.5-5.2 7.5-9.8V5.4L12 2.5Z" fill="#fff"/><path d="m8.6 12 2.3 2.4 4.5-4.7" stroke="#16203a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="t"><b>Phishing Guardian</b><span>Trợ lý AI · chạy trên GreenNode AgentBase</span></div></div>
+  <div class="plat">Web · Microsoft Teams<br>3 model AI · tiếng Việt</div>
+</body></html>
